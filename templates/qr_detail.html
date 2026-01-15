@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}View QR Code - TextAnalyzer Pro{% endblock %}
+{% block content %}
+
+<style>
+    .qr-detail-container { max-width: 600px; margin: 0 auto; }
+    .qr-detail-header { margin-bottom: 40px; }
+    .qr-detail-header h1 { font-size: 32px; font-weight: 700; color: #1a1a1a; margin-bottom: 10px; }
+    .qr-detail-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center; }
+    .qr-image { margin: 20px 0; }
+    .qr-image img { max-width: 300px; border-radius: 8px; border: 2px solid #e5e5e5; }
+    .qr-info-section { margin: 30px 0; text-align: left; }
+    .qr-info-item { margin-bottom: 20px; }
+    .qr-info-label { font-size: 12px; color: #999; font-weight: 600; text-transform: uppercase; margin-bottom: 5px; }
+    .qr-info-value { font-size: 14px; color: #1a1a1a; word-break: break-all; padding: 10px; background: #f8f9fa; border-radius: 6px; }
+    .qr-actions { display: flex; gap: 10px; margin-top: 30px; }
+    .btn-download { flex: 1; padding: 12px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+    .btn-download:hover { background: #059669; transform: translateY(-2px); }
+    .btn-back { flex: 1; padding: 12px; background: #e5e5e5; color: #1a1a1a; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-decoration: none; display: flex; align-items: center; justify-content: center; }
+    .btn-back:hover { background: #d5d5d5; }
+</style>
+
+<div class="qr-detail-container">
+    <div class="qr-detail-header">
+        <h1>📱 QR Code Details</h1>
+    </div>
+
+    <div class="qr-detail-card">
+        <div class="qr-type-badge" style="display: inline-block; background: #e6f4ea; color: #137333; padding: 6px 16px; border-radius: 12px; font-size: 13px; font-weight: 600;">{{ qr_obj.qr_type|upper }}</div>
+        
+        <div class="qr-image">
+            {% if qr_obj.image %}
+                <img src="{{ qr_obj.image.url }}" alt="QR Code">
+            {% else %}
+                <p style="color: #999;">QR Code image not available</p>
+            {% endif %}
+        </div>
+
+        <div class="qr-info-section">
+            <div class="qr-info-item">
+                <div class="qr-info-label">Content</div>
+                <div class="qr-info-value">{{ qr_obj.content }}</div>
+            </div>
+            
+            <div class="qr-info-item">
+                <div class="qr-info-label">Type</div>
+                <div class="qr-info-value">{{ qr_obj.qr_type|title }}</div>
+            </div>
+            
+            <div class="qr-info-item">
+                <div class="qr-info-label">Created</div>
+                <div class="qr-info-value">{{ qr_obj.created_at|date:"M d, Y H:i:s" }}</div>
+            </div>
+        </div>
+
+        <div class="qr-actions">
+            {% if qr_obj.image %}
+                <a href="{{ qr_obj.image.url }}" download class="btn-download">⬇️ Download QR Code</a>
+            {% endif %}
+            <a href="{% url 'qr_generator' %}" class="btn-back">← Back to Generator</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Speech to Text Result{% endblock %}
+{% block content %}
+
+<div style="max-width: 900px; margin: 0 auto; padding: 30px 20px;">
+    <h1 style="color: #1a1a1a; margin-bottom: 10px;"><i class="fas fa-check-circle" style="color: #10b981; margin-right: 10px;"></i>Conversion Complete</h1>
+    <p style="color: #666; margin-bottom: 30px;">Your audio has been successfully converted to text</p>
+
+    <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px;">
+        <h3 style="color: #1a1a1a; margin-bottom: 15px;">Converted Text</h3>
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #10b981; min-height: 150px; line-height: 1.6; color: #333;">
+            {{ text }}
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+        <button onclick="copyText()" style="background: #3b82f6; color: white; padding: 12px 24px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer;">
+            <i class="fas fa-copy" style="margin-right: 8px;"></i>Copy Text
+        </button>
+        <a href="{% url 'speech_to_text' %}" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">
+            <i class="fas fa-plus" style="margin-right: 8px;"></i>Convert Another
+        </a>
+    </div>
+</div>
+
+<script>
+    function copyText() {
+        const text = document.querySelector('div[style*="background: #f8f9fa"]').innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Text copied to clipboard!');
+        });
+    }
+</script>
+
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}PDF Converter - TextAnalyzer Pro{% endblock %}
+
+{% block content %}
+<style>
+    .converter-header { margin-bottom: 30px; }
+    .converter-header h1 { color: #1a1a1a; font-weight: 700; font-size: 32px; }
+    .converter-header p { color: #666; font-size: 15px; }
+    .upload-area { border: 2px dashed #10b981; border-radius: 12px; padding: 40px; text-align: center; background: #f0fdf4; cursor: pointer; transition: all 0.3s; }
+    .upload-area:hover { background: #dcfce7; border-color: #059669; }
+    .upload-area i { font-size: 48px; color: #10b981; margin-bottom: 15px; display: block; }
+    .upload-area h5 { color: #1a1a1a; margin-bottom: 8px; }
+    .upload-area p { color: #666; font-size: 14px; margin: 0; }
+    .file-input { display: none; }
+    .btn-convert { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 12px 30px; border-radius: 25px; border: none; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+    .btn-convert:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16,185,129,0.3); }
+    .conversion-options { background: #f8f9fa; padding: 20px; border-radius: 12px; margin-top: 20px; }
+    .option-group { margin-bottom: 15px; }
+    .option-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #1a1a1a; }
+    .option-group select { width: 100%; padding: 10px; border: 1px solid #e5e5e5; border-radius: 6px; font-size: 14px; }
+</style>
+
+<div class="converter-header">
+    <h1>📄 PDF Converter</h1>
+    <p>Convert documents to and from PDF format</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <form method="post" enctype="multipart/form-data" id="converterForm">
+                    {% csrf_token %}
+                    
+                    <div class="upload-area" onclick="document.getElementById('fileInput').click();">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h5>Click to upload or drag and drop</h5>
+                        <p>PDF files only (Max 50MB)</p>
+                        <input type="file" id="fileInput" name="file" class="file-input" accept=".pdf" required>
+                    </div>
+
+                    <div id="fileName" style="margin-top: 15px; padding: 12px; background: #e6f4ea; border-radius: 6px; display: none; color: #137333;">
+                        <i class="fas fa-check-circle"></i> <span id="fileNameText"></span>
+                    </div>
+
+                    <div class="conversion-options">
+                        <div class="option-group">
+                            <label for="conversionType">Convert To Format</label>
+                            <select name="conversion_type" id="conversionType">
+                                <option value="pdf">PDF</option>
+                                <option value="docx">Word (DOCX)</option>
+                                <option value="txt">Text (TXT)</option>
+                                <option value="xlsx">Excel (XLSX)</option>
+                                <option value="csv">CSV</option>
+                                <option value="html">HTML</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-convert w-100 mt-4">
+                        <i class="fas fa-exchange-alt"></i> Convert File
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0" style="color: #1a1a1a; font-weight: 700;">ℹ️ About PDF Converter</h5>
+            </div>
+            <div class="card-body">
+                <ul style="color: #666; font-size: 14px; line-height: 1.8;">
+                    <li>Convert any document format to PDF</li>
+                    <li>Extract text and images from PDF files</li>
+                    <li>Maintain formatting and layout</li>
+                    <li>Support for multiple file formats</li>
+                    <li>Fast and secure conversion</li>
+                    <li>No file size limitations</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const fileInput = document.getElementById('fileInput');
+    const fileName = document.getElementById('fileName');
+    const fileNameText = document.getElementById('fileNameText');
+
+    fileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            fileNameText.textContent = this.files[0].name;
+            fileName.style.display = 'block';
+        }
+    });
+</script>
+{% endblock %}

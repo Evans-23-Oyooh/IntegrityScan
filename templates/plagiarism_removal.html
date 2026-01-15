@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+
+{% block title %}Remove Plagiarism - TextAnalyzer Pro{% endblock %}
+
+{% block content %}
+<style>
+    .removal-header { margin-bottom: 30px; }
+    .removal-header h1 { color: #1a1a1a; font-weight: 700; font-size: 32px; margin-bottom: 10px; }
+    .removal-header p { color: #666; font-size: 15px; }
+    .input-section { background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #1a1a1a; font-size: 14px; }
+    .form-group textarea { width: 100%; padding: 12px; border: 1px solid #e5e5e5; border-radius: 6px; font-family: inherit; font-size: 14px; min-height: 200px; resize: vertical; }
+    .form-group textarea:focus { outline: none; border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
+    .slider-container { margin-bottom: 20px; }
+    .slider-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .slider-label label { margin: 0; font-weight: 600; color: #1a1a1a; font-size: 14px; }
+    .slider-value { background: #10b981; color: white; padding: 4px 12px; border-radius: 20px; font-weight: 600; font-size: 13px; }
+    .form-range { width: 100%; height: 6px; border-radius: 3px; background: #e5e5e5; outline: none; -webkit-appearance: none; }
+    .form-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); cursor: pointer; box-shadow: 0 2px 8px rgba(16,185,129,0.3); }
+    .form-range::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); cursor: pointer; border: none; box-shadow: 0 2px 8px rgba(16,185,129,0.3); }
+    .btn-remove { width: 100%; padding: 14px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; margin-top: 20px; display: block; }
+    .btn-remove:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16,185,129,0.3); }
+    .info-box { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+    .info-box p { margin: 0; color: #1e40af; font-size: 14px; }
+    .info-box i { color: #3b82f6; margin-right: 8px; }
+    .slider-info { background: #f0fdf4; border-left: 4px solid #10b981; padding: 12px; border-radius: 6px; margin-top: 10px; font-size: 13px; color: #137333; }
+    .tab-btn { padding: 12px 20px; background: none; border: none; color: #666; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; }
+    .tab-btn.active { color: #10b981; border-bottom-color: #10b981; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .upload-area { border: 2px dashed #10b981; border-radius: 8px; padding: 40px; text-align: center; background: #f0fdf4; cursor: pointer; transition: all 0.3s; }
+    .upload-area:hover { background: #dcfce7; border-color: #059669; }
+    .upload-area i { font-size: 40px; color: #10b981; margin-bottom: 15px; display: block; }
+    .upload-area h5 { color: #1a1a1a; margin-bottom: 8px; }
+    .upload-area p { color: #666; font-size: 13px; margin: 0; }
+    .file-input { display: none; }
+    .method-card { padding: 20px; background: #f8f9fa; border-radius: 8px; }
+    .method-card i { font-size: 24px; color: #10b981; margin-bottom: 10px; display: block; }
+    .method-card h6 { color: #1a1a1a; margin-bottom: 8px; }
+    .method-card p { font-size: 13px; color: #666; margin: 0; }
+    .tip-item { margin-bottom: 12px; }
+    .tip-item i { color: #10b981; margin-right: 10px; }
+    .error-display { background: #fee; border: 1px solid #fcc; color: #c33; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+    .error-display h4 { margin: 0 0 10px 0; font-size: 16px; }
+    .error-display pre { margin: 0; font-size: 12px; overflow-x: auto; }
+    @media (max-width: 768px) {
+        .removal-header h1 { font-size: 24px; }
+    }
+</style>
+
+<div class="removal-header">
+    <h1>Plagiarism Removal</h1>
+    <p>Intelligently rewrite and remove plagiarism from your text using advanced algorithms</p>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="input-section">
+    <div class="info-box">
+        <i class="fas fa-info-circle"></i>
+        <p>Paste your text to remove plagiarism. Our system uses synonym replacement, paraphrasing, and sentence restructuring to create unique content.</p>
+    </div>
+
+    <form method="post" id="removalForm" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" id="fileInput" name="document" class="file-input" accept=".pdf,.doc,.docx,.txt" style="display:none;">
+        <input type="hidden" id="textInput" name="text">
+        
+        <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e5e5e5; padding-bottom: 10px;">
+            <button type="button" class="tab-btn active" onclick="switchTab('text')"><i class="fas fa-file-alt"></i> Paste Text</button>
+            <button type="button" class="tab-btn" onclick="switchTab('file')"><i class="fas fa-upload"></i> Upload File</button>
+        </div>
+        
+        <div id="text" class="tab-content active">
+            <div class="form-group">
+                <label for="textDisplay">Text to Process</label>
+                <textarea id="textDisplay" placeholder="Enter or paste the text you want to remove plagiarism from..." style="width: 100%; padding: 12px; border: 1px solid #e5e5e5; border-radius: 6px; font-family: inherit; font-size: 14px; min-height: 200px; resize: vertical;"></textarea>
+            </div>
+        </div>
+
+        <div id="file" class="tab-content">
+            <div class="upload-area" onclick="document.getElementById('fileInput').click();">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <h5>Click to upload or drag and drop</h5>
+                <p>PDF, DOC, DOCX, TXT (Max 50MB)</p>
+            </div>
+            <div id="fileName" style="margin-top: 15px; padding: 12px; background: #e6f4ea; border-radius: 6px; display: none; color: #137333;">
+                <i class="fas fa-check-circle"></i> <span id="fileNameText"></span>
+            </div>
+        </div>
+
+        <div class="slider-container">
+            <div class="slider-label">
+                <label for="target_similarity">Target Similarity Level</label>
+                <span class="slider-value" id="targetValue">30%</span>
+            </div>
+            <input type="range" class="form-range" id="target_similarity" name="target_similarity" min="0.1" max="0.8" step="0.1" value="0.3">
+            <div class="slider-info">
+                <i class="fas fa-lightbulb"></i> Lower values = more aggressive rewriting | Higher values = preserve more original text
+            </div>
+        </div>
+
+        <button type="submit" class="btn-remove" style="margin-top: 30px;">
+            <i class="fas fa-eraser"></i> Remove Plagiarism
+        </button>
+    </form>
+</div>
+
+<!-- Methods Section -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0" style="color: #1a1a1a; font-weight: 700;"><i class="fas fa-cogs"></i> Removal Methods</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <div class="method-card">
+                            <i class="fas fa-exchange-alt"></i>
+                            <h6>Synonym Replacement</h6>
+                            <p>Replace words with intelligent synonyms</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="method-card">
+                            <i class="fas fa-random"></i>
+                            <h6>Restructuring</h6>
+                            <p>Change sentence patterns and structure</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="method-card">
+                            <i class="fas fa-wand-magic-sparkles"></i>
+                            <h6>Paraphrasing</h6>
+                            <p>AI-powered intelligent rewriting</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="method-card">
+                            <i class="fas fa-layer-group"></i>
+                            <h6>Multi-Pass</h6>
+                            <p>Multiple improvement iterations</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tips Section -->
+<div class="row" style="margin-top: 30px;">
+    <div class="col-lg-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0" style="color: #1a1a1a; font-weight: 700;"><i class="fas fa-lightbulb"></i> Processing Tips</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul style="list-style: none; padding: 0;">
+                            <li class="tip-item"><i class="fas fa-check"></i>Start with 50-60% target similarity for balanced results</li>
+                            <li class="tip-item"><i class="fas fa-check"></i>Review output for meaning preservation</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul style="list-style: none; padding: 0;">
+                            <li class="tip-item"><i class="fas fa-check"></i>Multiple passes may improve results</li>
+                            <li class="tip-item"><i class="fas fa-check"></i>Always verify final content quality</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Warning Section -->
+<div style="margin-top: 30px; background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 6px;">
+    <i class="fas fa-exclamation-triangle" style="color: #92400e; margin-right: 8px;"></i>
+    <strong style="color: #92400e;">Important Notice:</strong>
+    <p style="color: #92400e; margin: 8px 0 0 0; font-size: 14px;">This tool is for educational purposes. Always ensure proper citation and attribution in academic work. Use responsibly and ethically.</p>
+</div>
+
+<script>
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    document.getElementById('target_similarity').oninput = function() {
+        const value = Math.round(this.value * 100);
+        document.getElementById('targetValue').textContent = value + '%';
+    };
+
+    document.getElementById('fileInput').addEventListener('change', function() {
+        if (this.files.length > 0) {
+            const file = this.files[0];
+            if (file.size > 50 * 1024 * 1024) {
+                alert('File size exceeds 50MB limit');
+                this.value = '';
+                document.getElementById('fileName').style.display = 'none';
+                return;
+            }
+            document.getElementById('fileNameText').textContent = file.name + ' (' + (file.size / 1024).toFixed(2) + ' KB)';
+            document.getElementById('fileName').style.display = 'block';
+        }
+    });
+
+    document.querySelector('.upload-area').addEventListener('dragover', (e) => {
+        e.preventDefault();
+        document.querySelector('.upload-area').style.background = '#dcfce7';
+    });
+
+    document.querySelector('.upload-area').addEventListener('dragleave', () => {
+        document.querySelector('.upload-area').style.background = '#f0fdf4';
+    });
+
+    document.querySelector('.upload-area').addEventListener('drop', (e) => {
+        e.preventDefault();
+        document.querySelector('.upload-area').style.background = '#f0fdf4';
+        document.getElementById('fileInput').files = e.dataTransfer.files;
+        document.getElementById('fileInput').dispatchEvent(new Event('change'));
+    });
+
+    document.getElementById('removalForm').addEventListener('submit', function(e) {
+        document.getElementById('textInput').value = document.getElementById('textDisplay').value;
+    });
+</script>
+
+{% endblock %}

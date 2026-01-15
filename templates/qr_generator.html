@@ -1,0 +1,359 @@
+{% extends 'base.html' %}
+{% block title %}QR Code Generator - TextAnalyzer Pro{% endblock %}
+{% block content %}
+
+<style>
+    .qr-header { margin-bottom: 40px; }
+    .qr-header h1 { font-size: 36px; font-weight: 800; color: #1a1a1a; margin-bottom: 8px; }
+    .qr-header p { color: #666; font-size: 16px; }
+    
+    .qr-info-box { background: linear-gradient(135deg, #e6f4ea 0%, #f0fdf4 100%); border-left: 4px solid #10b981; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+    .qr-info-box p { margin: 0; color: #137333; font-size: 14px; }
+    
+    .qr-main-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px; }
+    
+    .qr-input-section { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .qr-input-section h3 { font-size: 18px; font-weight: 600; margin-bottom: 25px; color: #1a1a1a; }
+    
+    .qr-type-selector { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 25px; }
+    .qr-type-card { padding: 16px; border: 2px solid #e5e5e5; background: white; border-radius: 8px; cursor: pointer; transition: all 0.3s; text-align: center; }
+    .qr-type-card:hover { border-color: #10b981; background: #f9fdf7; }
+    .qr-type-card.active { border-color: #10b981; background: #e6f4ea; }
+    .qr-type-card i { font-size: 24px; margin-bottom: 8px; color: #10b981; }
+    .qr-type-card .label { font-size: 13px; font-weight: 600; color: #1a1a1a; }
+    .qr-type-card.active .label { color: #10b981; }
+    
+    .qr-form-group { margin-bottom: 18px; }
+    .qr-form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #1a1a1a; font-size: 14px; }
+    .qr-form-group input, .qr-form-group select, .qr-form-group textarea { width: 100%; padding: 12px; border: 1px solid #e5e5e5; border-radius: 6px; font-size: 14px; font-family: inherit; }
+    .qr-form-group input:focus, .qr-form-group select:focus, .qr-form-group textarea:focus { outline: none; border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
+    
+    .qr-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    
+    .qr-btn-generate { width: 100%; padding: 14px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.3s; margin-top: 10px; }
+    .qr-btn-generate:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16,185,129,0.3); }
+    
+    .qr-features-section { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .qr-features-section h3 { font-size: 18px; font-weight: 600; margin-bottom: 20px; color: #1a1a1a; }
+    
+    .qr-feature-item { display: flex; gap: 12px; margin-bottom: 16px; }
+    .qr-feature-item i { font-size: 18px; min-width: 24px; color: #10b981; }
+    .qr-feature-item span { font-size: 14px; color: #666; line-height: 1.5; }
+    .qr-feature-item strong { color: #1a1a1a; }
+    
+    .qr-recent-section { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-top: 30px; }
+    .qr-recent-section h3 { font-size: 18px; font-weight: 600; margin-bottom: 20px; color: #1a1a1a; }
+    
+    .qr-recent-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; border: 1px solid #e5e5e5; border-radius: 8px; margin-bottom: 12px; transition: all 0.2s; }
+    .qr-recent-item:hover { border-color: #10b981; background: #f9fdf7; }
+    .qr-recent-item:last-child { margin-bottom: 0; }
+    .qr-recent-info { flex: 1; }
+    .qr-recent-badge { display: inline-block; background: #e6f4ea; color: #137333; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; margin-bottom: 8px; }
+    .qr-recent-content { font-size: 14px; color: #1a1a1a; word-break: break-all; margin-bottom: 4px; }
+    .qr-recent-date { font-size: 12px; color: #999; }
+    .qr-recent-actions { display: flex; gap: 8px; }
+    .qr-btn-view { padding: 8px 14px; background: #10b981; color: white; border: none; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s; font-weight: 600; text-decoration: none; display: inline-block; }
+    .qr-btn-view:hover { background: #059669; transform: translateY(-1px); }
+    .qr-btn-delete { padding: 8px 14px; background: #ff4757; color: white; border: none; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s; font-weight: 600; }
+    .qr-btn-delete:hover { background: #ff3838; transform: translateY(-1px); }
+    
+    @media (max-width: 768px) {
+        .qr-main-container { grid-template-columns: 1fr; }
+        .qr-type-selector { grid-template-columns: repeat(2, 1fr); }
+        .qr-recent-item { flex-direction: column; align-items: flex-start; }
+        .qr-recent-actions { width: 100%; margin-top: 12px; }
+    }
+</style>
+
+<div class="qr-header">
+    <h1>QR Code Generator</h1>
+    <p>Create professional QR codes for any purpose - URLs, contact info, portfolios, certificates, and more</p>
+</div>
+
+<div class="qr-info-box">
+    <p>Generate high-quality QR codes instantly. Perfect for marketing campaigns, contact sharing, portfolio links, certificate verification, and quick access to information.</p>
+</div>
+
+<div class="qr-main-container">
+    <!-- Input Section -->
+    <div class="qr-input-section">
+        <h3>Generate QR Code</h3>
+        
+        <div class="qr-type-selector">
+            <div class="qr-type-card active" data-type="url">
+                <i class="fas fa-link"></i>
+                <div class="label">URL</div>
+            </div>
+            <div class="qr-type-card" data-type="text">
+                <i class="fas fa-file-alt"></i>
+                <div class="label">Text</div>
+            </div>
+            <div class="qr-type-card" data-type="vcard">
+                <i class="fas fa-user-circle"></i>
+                <div class="label">vCard</div>
+            </div>
+            <div class="qr-type-card" data-type="portfolio">
+                <i class="fas fa-briefcase"></i>
+                <div class="label">Portfolio</div>
+            </div>
+            <div class="qr-type-card" data-type="certificate">
+                <i class="fas fa-certificate"></i>
+                <div class="label">Certificate</div>
+            </div>
+            <div class="qr-type-card" data-type="email">
+                <i class="fas fa-envelope"></i>
+                <div class="label">Email</div>
+            </div>
+            <div class="qr-type-card" data-type="phone">
+                <i class="fas fa-phone"></i>
+                <div class="label">Phone</div>
+            </div>
+            <div class="qr-type-card" data-type="sms">
+                <i class="fas fa-sms"></i>
+                <div class="label">SMS</div>
+            </div>
+            <div class="qr-type-card" data-type="wifi">
+                <i class="fas fa-wifi"></i>
+                <div class="label">WiFi</div>
+            </div>
+            <div class="qr-type-card" data-type="event">
+                <i class="fas fa-calendar-alt"></i>
+                <div class="label">Event</div>
+            </div>
+        </div>
+
+        <form method="post" id="qrForm">
+            {% csrf_token %}
+            <input type="hidden" name="qr_type" id="qr_type" value="url">
+
+            <!-- URL Type -->
+            <div class="qr-content-form" id="url-form">
+                <div class="qr-form-group">
+                    <label for="url">Website URL</label>
+                    <input type="url" id="url" name="content" placeholder="https://example.com" required>
+                </div>
+            </div>
+
+            <!-- Text Type -->
+            <div class="qr-content-form" id="text-form" style="display: none;">
+                <div class="qr-form-group">
+                    <label for="text">Text Content</label>
+                    <textarea id="text" name="content" placeholder="Enter text for QR code" rows="4" required></textarea>
+                </div>
+            </div>
+
+            <!-- vCard Type -->
+            <div class="qr-content-form" id="vcard-form" style="display: none;">
+                <div class="qr-form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" placeholder="John Doe" required>
+                </div>
+                <div class="qr-form-row">
+                    <div class="qr-form-group">
+                        <label for="phone">Phone</label>
+                        <input type="tel" id="phone" name="phone" placeholder="+1234567890">
+                    </div>
+                    <div class="qr-form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" placeholder="john@example.com">
+                    </div>
+                </div>
+                <div class="qr-form-group">
+                    <label for="organization">Organization</label>
+                    <input type="text" id="organization" name="organization" placeholder="Company Name">
+                </div>
+            </div>
+
+            <!-- Portfolio Type -->
+            <div class="qr-content-form" id="portfolio-form" style="display: none;">
+                <div class="qr-form-group">
+                    <label for="portfolio_name">Your Name</label>
+                    <input type="text" id="portfolio_name" name="portfolio_name" placeholder="John Doe" required>
+                </div>
+                <div class="qr-form-group">
+                    <label for="portfolio_url">Portfolio URL</label>
+                    <input type="url" id="portfolio_url" name="portfolio_url" placeholder="https://yourportfolio.com" required>
+                </div>
+                <div class="qr-form-group">
+                    <label for="portfolio_title">Professional Title</label>
+                    <input type="text" id="portfolio_title" name="portfolio_title" placeholder="Web Developer" required>
+                </div>
+            </div>
+
+            <!-- Certificate Type -->
+            <div class="qr-content-form" id="certificate-form" style="display: none;">
+                <div class="qr-form-group">
+                    <label for="cert_name">Certificate Name</label>
+                    <input type="text" id="cert_name" name="cert_name" placeholder="AWS Certified Solutions Architect" required>
+                </div>
+                <div class="qr-form-group">
+                    <label for="cert_id">Certificate ID</label>
+                    <input type="text" id="cert_id" name="cert_id" placeholder="CERT-2024-12345" required>
+                </div>
+                <div class="qr-form-group">
+                    <label for="cert_url">Verification URL</label>
+                    <input type="url" id="cert_url" name="cert_url" placeholder="https://verify.example.com/cert" required>
+                </div>
+            </div>
+
+            <!-- Email Type -->
+            <div class="qr-content-form" id="email-form" style="display: none;">
+                <div class="qr-form-group">
+                    <label for="email_addr">Email Address</label>
+                    <input type="email" id="email_addr" name="email_addr" placeholder="contact@example.com" required>
+                </div>
+                <div class="qr-form-group">
+                    <label for="email_subject">Subject (Optional)</label>
+                    <input type="text" id="email_subject" name="email_subject" placeholder="Email subject">
+                </div>
+            </div>
+
+            <!-- Phone Type -->
+            <div class="qr-content-form" id="phone-form" style="display: none;">
+                <div class="qr-form-group">
+                    <label for="phone_num">Phone Number</label>
+                    <input type="tel" id="phone_num" name="phone_num" placeholder="+1234567890" required>
+                </div>
+            </div>
+
+            <!-- SMS Type -->
+            <div class="qr-content-form" id="sms-form" style="display: none;">
+                <div class="qr-form-group">
+                    <label for="sms_num">Phone Number</label>
+                    <input type="tel" id="sms_num" name="sms_num" placeholder="+1234567890" required>
+                </div>
+                <div class="qr-form-group">
+                    <label for="sms_msg">Message</label>
+                    <textarea id="sms_msg" name="sms_msg" placeholder="SMS message" rows="3" required></textarea>
+                </div>
+            </div>
+
+            <!-- WiFi Type -->
+            <div class="qr-content-form" id="wifi-form" style="display: none;">
+                <div class="qr-form-group">
+                    <label for="wifi_ssid">Network Name (SSID)</label>
+                    <input type="text" id="wifi_ssid" name="wifi_ssid" placeholder="WiFi Network Name" required>
+                </div>
+                <div class="qr-form-group">
+                    <label for="wifi_pass">Password</label>
+                    <input type="password" id="wifi_pass" name="wifi_pass" placeholder="WiFi Password" required>
+                </div>
+            </div>
+
+            <!-- Event Type -->
+            <div class="qr-content-form" id="event-form" style="display: none;">
+                <div class="qr-form-group">
+                    <label for="event_name">Event Name</label>
+                    <input type="text" id="event_name" name="event_name" placeholder="Conference 2024" required>
+                </div>
+                <div class="qr-form-group">
+                    <label for="event_date">Date & Time</label>
+                    <input type="datetime-local" id="event_date" name="event_date" required>
+                </div>
+                <div class="qr-form-group">
+                    <label for="event_location">Location</label>
+                    <input type="text" id="event_location" name="event_location" placeholder="Event Location" required>
+                </div>
+            </div>
+
+            <button type="submit" class="qr-btn-generate">Generate QR Code</button>
+        </form>
+    </div>
+
+    <!-- Features Section -->
+    <div class="qr-features-section">
+        <h3>QR Code Types</h3>
+        <div class="qr-feature-item">
+            <i class="fas fa-link"></i>
+            <span><strong>URL:</strong> Link to websites and web pages</span>
+        </div>
+        <div class="qr-feature-item">
+            <i class="fas fa-file-alt"></i>
+            <span><strong>Text:</strong> Store plain text information</span>
+        </div>
+        <div class="qr-feature-item">
+            <i class="fas fa-user-circle"></i>
+            <span><strong>vCard:</strong> Share contact information</span>
+        </div>
+        <div class="qr-feature-item">
+            <i class="fas fa-briefcase"></i>
+            <span><strong>Portfolio:</strong> Professional portfolio links</span>
+        </div>
+        <div class="qr-feature-item">
+            <i class="fas fa-certificate"></i>
+            <span><strong>Certificate:</strong> Verify credentials and achievements</span>
+        </div>
+        <div class="qr-feature-item">
+            <i class="fas fa-envelope"></i>
+            <span><strong>Email:</strong> Send emails directly from QR scan</span>
+        </div>
+        <div class="qr-feature-item">
+            <i class="fas fa-phone"></i>
+            <span><strong>Phone:</strong> Call with one scan</span>
+        </div>
+        <div class="qr-feature-item">
+            <i class="fas fa-sms"></i>
+            <span><strong>SMS:</strong> Send text messages instantly</span>
+        </div>
+        <div class="qr-feature-item">
+            <i class="fas fa-wifi"></i>
+            <span><strong>WiFi:</strong> Connect to networks automatically</span>
+        </div>
+        <div class="qr-feature-item">
+            <i class="fas fa-calendar-alt"></i>
+            <span><strong>Event:</strong> Add events to calendar</span>
+        </div>
+    </div>
+</div>
+
+<!-- Recent QR Codes -->
+{% if recent_qrcodes %}
+    <div class="qr-recent-section">
+        <h3>Recent QR Codes</h3>
+        {% for qr in recent_qrcodes %}
+            <div class="qr-recent-item">
+                <div class="qr-recent-info">
+                    <div class="qr-recent-badge">{{ qr.qr_type|upper }}</div>
+                    <div class="qr-recent-content">{{ qr.content|truncatewords:20 }}</div>
+                    <div class="qr-recent-date">Created: {{ qr.created_at|date:"M d, Y H:i" }}</div>
+                </div>
+                <div class="qr-recent-actions">
+                    <a href="{% url 'view_qr' qr.id %}" class="qr-btn-view">View</a>
+                    <form method="post" action="{% url 'delete_qr' qr.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="qr-btn-delete" onclick="return confirm('Delete this QR code?')">Delete</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<script>
+    const qrTypeCards = document.querySelectorAll('.qr-type-card');
+    const qrTypeInput = document.getElementById('qr_type');
+    const qrForm = document.getElementById('qrForm');
+
+    qrTypeCards.forEach(card => {
+        card.addEventListener('click', function() {
+            const type = this.dataset.type;
+            
+            qrTypeCards.forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            
+            document.querySelectorAll('.qr-content-form').forEach(form => form.style.display = 'none');
+            document.getElementById(type + '-form').style.display = 'block';
+            
+            qrTypeInput.value = type;
+            
+            qrForm.querySelectorAll('input[required], textarea[required]').forEach(field => {
+                field.required = false;
+            });
+            document.getElementById(type + '-form').querySelectorAll('input[required], textarea[required]').forEach(field => {
+                field.required = true;
+            });
+        });
+    });
+</script>
+
+{% endblock %}

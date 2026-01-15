@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+
+{% block title %}Plagiarism Results - TextAnalyzer Pro{% endblock %}
+
+{% block content %}
+<style>
+    .result-header { margin-bottom: 30px; }
+    .result-header h1 { color: #1a1a1a; font-weight: 700; font-size: 32px; margin-bottom: 10px; }
+    .score-card { background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .score-display { text-align: center; }
+    .score-number { font-size: 64px; font-weight: 900; margin: 20px 0; }
+    .score-number.safe { color: #10b981; }
+    .score-number.warning { color: #f59e0b; }
+    .score-number.danger { color: #ef4444; }
+    .score-label { font-size: 16px; color: #666; font-weight: 600; }
+    .score-status { font-size: 18px; font-weight: 700; margin-top: 15px; padding: 12px; border-radius: 8px; }
+    .status-safe { background: #e6f4ea; color: #137333; }
+    .status-warning { background: #fef3c7; color: #92400e; }
+    .status-danger { background: #fee2e2; color: #991b1b; }
+    .progress-bar-custom { height: 30px; background: #e5e5e5; border-radius: 8px; overflow: hidden; margin: 15px 0; }
+    .progress-fill { height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 14px; }
+    .fill-safe { background: linear-gradient(90deg, #10b981 0%, #059669 100%); }
+    .fill-warning { background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%); }
+    .fill-danger { background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%); }
+    .details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px; }
+    .detail-item { background: #f8f9fa; padding: 15px; border-radius: 8px; }
+    .detail-label { font-size: 12px; color: #999; text-transform: uppercase; font-weight: 600; margin-bottom: 8px; }
+    .detail-value { font-size: 24px; font-weight: 700; color: #1a1a1a; }
+    .matches-section { margin-top: 30px; }
+    .match-card { background: white; border: 1px solid #e5e5e5; border-radius: 12px; padding: 20px; margin-bottom: 15px; transition: all 0.3s; }
+    .match-card:hover { box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+    .match-title { font-size: 16px; font-weight: 700; color: #1a1a1a; margin-bottom: 12px; }
+    .match-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
+    .match-stat { }
+    .match-stat-label { font-size: 12px; color: #999; margin-bottom: 4px; }
+    .match-stat-value { font-size: 18px; font-weight: 700; color: #10b981; }
+    .btn-new-check { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block; transition: all 0.3s; }
+    .btn-new-check:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16,185,129,0.3); color: white; }
+    .text-preview { background: #f8f9fa; padding: 15px; border-radius: 8px; max-height: 200px; overflow-y: auto; font-size: 13px; color: #666; line-height: 1.6; }
+    .tech-badge { display: inline-block; background: #e0f2fe; color: #0369a1; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-top: 10px; }
+    .method-badge { display: inline-block; background: #f3e8ff; color: #7c3aed; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-right: 5px; }
+    @media (max-width: 768px) {
+        .score-number { font-size: 48px; }
+        .details-grid { grid-template-columns: 1fr; }
+    }
+</style>
+
+<div class="result-header">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1><i class="fas fa-chart-bar" style="color: #10b981; margin-right: 10px;"></i>Plagiarism Detection Results</h1>
+            <p style="color: #666; margin: 0;">Ultra-accurate analysis using advanced AI models</p>
+            <div style="margin-top: 8px;">
+                <span class="tech-badge"><i class="fas fa-brain" style="margin-right: 5px;"></i>MPNet Embeddings</span>
+                <span class="tech-badge"><i class="fas fa-layer-group" style="margin-right: 5px;"></i>Multi-Method Analysis</span>
+            </div>
+        </div>
+        <a href="{% url 'plagiarism_check' %}" class="btn-new-check"><i class="fas fa-plus" style="margin-right: 8px;"></i>New Check</a>
+    </div>
+</div>
+
+<!-- Score Card -->
+<div class="score-card">
+    <div class="score-display">
+        <div class="score-label">Combined Similarity Score</div>
+        <div class="score-number {% if check.similarity_score > threshold %}danger{% elif check.similarity_score > 0.5 %}warning{% else %}safe{% endif %}">
+            {{ check.similarity_score|floatformat:1 }}%
+        </div>
+        <div class="progress-bar-custom">
+            <div class="progress-fill {% if check.similarity_score > threshold %}fill-danger{% elif check.similarity_score > 0.5 %}fill-warning{% else %}fill-safe{% endif %}" 
+                 style="width: {{ check.similarity_score|floatformat:0 }}%;">
+                {{ check.similarity_score|floatformat:1 }}%
+            </div>
+        </div>
+        <div class="score-status {% if check.similarity_score > threshold %}status-danger{% elif check.similarity_score > 0.5 %}status-warning{% else %}status-safe{% endif %}">
+            {% if check.similarity_score > threshold %}
+                <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>Plagiarism Detected
+            {% elif check.similarity_score > 0.5 %}
+                <i class="fas fa-info-circle" style="margin-right: 8px;"></i>Moderate Similarity
+            {% else %}
+                <i class="fas fa-check-circle" style="margin-right: 8px;"></i>No Plagiarism Detected
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="details-grid">
+        <div class="detail-item">
+            <div class="detail-label"><i class="fas fa-sliders-h" style="margin-right: 5px;"></i>Plagiarism Score</div>
+            <div class="detail-value">{{ plagiarism_score|floatformat:1 }}%</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label"><i class="fas fa-robot" style="margin-right: 5px;"></i>AI Detection</div>
+            <div class="detail-value" style="color: {% if ai_score > 45 %}#f59e0b{% else %}#10b981{% endif %};">{{ ai_score|floatformat:1 }}%</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label"><i class="fas fa-exclamation" style="margin-right: 5px;"></i>Overall Risk</div>
+            <div class="detail-value" style="color: {% if overall_risk > 50 %}#ef4444{% elif overall_risk > 30 %}#f59e0b{% else %}#10b981{% endif %};">{{ overall_risk|floatformat:1 }}%</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label"><i class="fas fa-font" style="margin-right: 5px;"></i>Text Length</div>
+            <div class="detail-value">{{ check.text|length }} chars</div>
+        </div>
+    </div>
+</div>
+
+{% if ai_markers %}
+<!-- AI Detection Markers -->
+<div class="card shadow-sm" style="margin-bottom: 30px; border-left: 4px solid #f59e0b;">
+    <div class="card-header bg-white border-bottom">
+        <h5 class="mb-0" style="color: #1a1a1a; font-weight: 700;"><i class="fas fa-robot" style="margin-right: 8px; color: #f59e0b;"></i>AI Content Analysis</h5>
+    </div>
+    <div class="card-body">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            {% for marker, score in ai_markers.items %}
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                <div style="font-size: 12px; color: #999; text-transform: uppercase; font-weight: 600; margin-bottom: 8px;">
+                    {{ marker|title }}
+                </div>
+                <div style="font-size: 20px; font-weight: 700; color: #1a1a1a;">
+                    {{ score|floatformat:1 }}%
+                </div>
+                <div style="height: 4px; background: #e5e5e5; border-radius: 2px; margin-top: 8px; overflow: hidden;">
+                    <div style="height: 100%; background: #f59e0b; width: {{ score|floatformat:0 }}%; border-radius: 2px;"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+<div class="card shadow-sm" style="margin-bottom: 30px;">
+    <div class="card-header bg-white border-bottom">
+        <h5 class="mb-0" style="color: #1a1a1a; font-weight: 700;"><i class="fas fa-file-lines" style="margin-right: 8px; color: #10b981;"></i>Analyzed Text</h5>
+    </div>
+    <div class="card-body">
+        <div class="text-preview">
+            {{ check.text|truncatewords:200 }}
+        </div>
+    </div>
+</div>
+
+<!-- Matching Documents -->
+{% if results %}
+<div class="matches-section">
+    <h3 style="color: #1a1a1a; font-weight: 700; margin-bottom: 20px;">
+        <i class="fas fa-link" style="margin-right: 8px; color: #10b981;"></i>Matching Documents ({{ results|length }})
+    </h3>
+    
+    {% for result in results %}
+    <div class="match-card">
+        <div class="match-title">
+            {% if result.document_id == 'ai_generated' %}
+                <i class="fas fa-robot" style="margin-right: 8px; color: #f59e0b;"></i>
+            {% else %}
+                <i class="fas fa-file-alt" style="margin-right: 8px; color: #3b82f6;"></i>
+            {% endif %}
+            {{ result.title }}
+        </div>
+        <div style="margin-bottom: 12px;">
+            {% if result.details.method %}
+                <span class="method-badge">{{ result.details.method }}</span>
+            {% endif %}
+            {% if result.details.semantic %}
+                <span class="method-badge">Semantic</span>
+            {% endif %}
+            {% if result.details.structural %}
+                <span class="method-badge">Structural</span>
+            {% endif %}
+            {% if result.details.statistical %}
+                <span class="method-badge">Statistical</span>
+            {% endif %}
+        </div>
+        <div class="match-details">
+            <div class="match-stat">
+                <div class="match-stat-label">Combined Score</div>
+                <div class="match-stat-value">{{ result.similarity|floatformat:1 }}%</div>
+            </div>
+            {% if result.details.semantic %}
+            <div class="match-stat">
+                <div class="match-stat-label">Semantic (50%)</div>
+                <div class="match-stat-value">{{ result.details.semantic|floatformat:1 }}%</div>
+            </div>
+            {% endif %}
+            {% if result.details.structural %}
+            <div class="match-stat">
+                <div class="match-stat-label">Structural (30%)</div>
+                <div class="match-stat-value">{{ result.details.structural|floatformat:1 }}%</div>
+            </div>
+            {% endif %}
+            {% if result.details.statistical %}
+            <div class="match-stat">
+                <div class="match-stat-label">Statistical (20%)</div>
+                <div class="match-stat-value">{{ result.details.statistical|floatformat:1 }}%</div>
+            </div>
+            {% endif %}
+            {% if result.details.ai_score %}
+            <div class="match-stat">
+                <div class="match-stat-label">AI Detection</div>
+                <div class="match-stat-value">{{ result.details.ai_score|floatformat:1 }}%</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card shadow-sm" style="background: #e6f4ea; border: 2px solid #10b981;">
+    <div class="card-body" style="text-align: center; padding: 40px;">
+        <i class="fas fa-check-circle" style="font-size: 48px; color: #10b981; margin-bottom: 15px; display: block;"></i>
+        <h5 style="color: #137333; margin-bottom: 10px;">No Matches Found</h5>
+        <p style="color: #137333; margin: 0;">Your text appears to be original with no matching documents in our database.</p>
+    </div>
+</div>
+{% endif %}
+
+<!-- Action Buttons -->
+<div style="margin-top: 30px; display: flex; gap: 15px; flex-wrap: wrap;">
+    <a href="{% url 'plagiarism_check' %}" class="btn-new-check"><i class="fas fa-plus" style="margin-right: 8px;"></i>Check Another Document</a>
+    <a href="{% url 'plagiarism_removal' %}" style="background: #3b82f6; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block; transition: all 0.3s;">
+        <i class="fas fa-wand-magic-sparkles" style="margin-right: 8px;"></i>Remove Plagiarism
+    </a>
+</div>
+
+{% endblock %}

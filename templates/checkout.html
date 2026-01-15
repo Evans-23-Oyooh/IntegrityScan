@@ -1,0 +1,265 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout - IntegrityScan{% endblock %}
+
+{% block content %}
+<style>
+    .checkout-container { max-width: 900px; margin: 0 auto; }
+    .checkout-header { margin-bottom: 40px; }
+    .checkout-header h1 { font-size: 32px; font-weight: 700; color: #1a1a1a; margin-bottom: 10px; }
+    .checkout-header p { color: #666; font-size: 15px; }
+    
+    .checkout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px; }
+    
+    .payment-methods { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .payment-methods h3 { font-size: 18px; font-weight: 600; margin-bottom: 20px; color: #1a1a1a; }
+    
+    .method-tabs { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 2px solid #e5e5e5; }
+    .method-tab { padding: 12px 20px; background: none; border: none; cursor: pointer; font-weight: 500; color: #666; border-bottom: 3px solid transparent; transition: all 0.2s; }
+    .method-tab.active { color: #10b981; border-bottom-color: #10b981; }
+    .method-tab:hover { color: #10b981; }
+    
+    .method-content { display: none; }
+    .method-content.active { display: block; }
+    
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #1a1a1a; font-size: 14px; }
+    .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #e5e5e5; border-radius: 6px; font-size: 14px; font-family: inherit; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
+    
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    
+    .order-summary { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); height: fit-content; }
+    .order-summary h3 { font-size: 18px; font-weight: 600; margin-bottom: 20px; color: #1a1a1a; }
+    
+    .summary-item { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; }
+    .summary-item strong { color: #1a1a1a; }
+    .summary-total { border-top: 2px solid #e5e5e5; padding-top: 12px; margin-top: 12px; display: flex; justify-content: space-between; font-size: 18px; font-weight: 700; color: #10b981; }
+    
+    .plan-badge { display: inline-block; background: #e6f4ea; color: #137333; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; margin-bottom: 15px; }
+    
+    .btn-pay { width: 100%; padding: 14px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.3s; margin-top: 20px; }
+    .btn-pay:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16,185,129,0.3); }
+    
+    .security-info { display: flex; align-items: center; gap: 10px; margin-top: 15px; font-size: 13px; color: #666; }
+    .security-info i { color: #10b981; }
+    
+    .free-trial-badge { background: #e6f4ea; border: 2px solid #10b981; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 20px; }
+    .free-trial-badge p { margin: 0; color: #137333; font-weight: 600; }
+    
+    .mpesa-info { background: #fff3cd; border: 1px solid #ffc107; padding: 12px; border-radius: 6px; font-size: 13px; color: #856404; margin-bottom: 15px; }
+    .paypal-info { background: #cfe2ff; border: 1px solid #0d6efd; padding: 12px; border-radius: 6px; font-size: 13px; color: #084298; margin-bottom: 15px; }
+    
+    @media (max-width: 768px) {
+        .checkout-grid { grid-template-columns: 1fr; gap: 20px; }
+        .order-summary { height: auto; }
+    }
+</style>
+
+<div class="checkout-container">
+    <div class="checkout-header">
+        <h1><i class="fas fa-credit-card" style="margin-right: 10px; color: #10b981;"></i>Checkout</h1>
+        <p>Complete your purchase securely</p>
+    </div>
+
+    {% if amount == 0 %}
+        <div class="free-trial-badge">
+            <p><i class="fas fa-star" style="margin-right: 8px; color: #10b981;"></i>Start your 14-day free trial - No payment required!</p>
+        </div>
+        <form method="post" action="{% url 'process_payment' %}" style="max-width: 400px;">
+            {% csrf_token %}
+            <input type="hidden" name="plan" value="{{ plan }}">
+            <button type="submit" class="btn-pay">Start Free Trial</button>
+        </form>
+    {% else %}
+        <div class="checkout-grid">
+            <!-- Payment Methods -->
+            <div class="payment-methods">
+                <h3>Select Payment Method</h3>
+                
+                <div class="method-tabs">
+                    <button class="method-tab active" data-method="card"><i class="fas fa-credit-card" style="margin-right: 5px;"></i>Card</button>
+                    <button class="method-tab" data-method="mpesa"><i class="fas fa-mobile-alt" style="margin-right: 5px;"></i>M-Pesa</button>
+                    <button class="method-tab" data-method="paypal"><i class="fab fa-paypal" style="margin-right: 5px;"></i>PayPal</button>
+                </div>
+
+                <!-- Card Payment -->
+                <div class="method-content active" id="card-method">
+                    <form method="post" action="{% url 'process_payment' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="plan" value="{{ plan }}">
+                        <input type="hidden" name="payment_method" value="card">
+
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" value="{{ user.email }}" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="fullname">Full Name</label>
+                            <input type="text" id="fullname" name="fullname" value="{{ user.first_name }} {{ user.last_name }}" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="card_number">Card Number</label>
+                            <input type="text" id="card_number" name="card_number" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="expiry">Expiry Date</label>
+                                <input type="text" id="expiry" name="expiry" placeholder="MM/YY" maxlength="5" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="cvv">CVV</label>
+                                <input type="text" id="cvv" name="cvv" placeholder="123" maxlength="4" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-pay">Pay ${{ amount }}</button>
+
+                        <div class="security-info">
+                            <i class="fas fa-lock"></i>
+                            <span>Your payment information is secure and encrypted</span>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- M-Pesa Payment -->
+                <div class="method-content" id="mpesa-method">
+                    <div class="mpesa-info">
+                        <strong><i class="fas fa-mobile-alt" style="margin-right: 8px;"></i>M-Pesa Payment</strong><br>
+                        You will be redirected to M-Pesa to complete the payment
+                    </div>
+                    <form method="post" action="{% url 'process_payment' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="plan" value="{{ plan }}">
+                        <input type="hidden" name="payment_method" value="mpesa">
+
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" placeholder="+254712345678" required>
+                        </div>
+
+                        <button type="submit" class="btn-pay">Pay ${{ amount }} via M-Pesa</button>
+
+                        <div class="security-info">
+                            <i class="fas fa-lock"></i>
+                            <span>Secure M-Pesa payment gateway</span>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- PayPal Payment -->
+                <div class="method-content" id="paypal-method">
+                    <div class="paypal-info">
+                        <strong><i class="fab fa-paypal" style="margin-right: 8px;"></i>PayPal Payment</strong><br>
+                        You will be redirected to PayPal to complete the payment
+                    </div>
+                    <form method="post" action="{% url 'process_payment' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="plan" value="{{ plan }}">
+                        <input type="hidden" name="payment_method" value="paypal">
+
+                        <div class="form-group">
+                            <label for="paypal_email">PayPal Email</label>
+                            <input type="email" id="paypal_email" name="paypal_email" value="{{ user.email }}" required>
+                        </div>
+
+                        <button type="submit" class="btn-pay">Pay ${{ amount }} via PayPal</button>
+
+                        <div class="security-info">
+                            <i class="fas fa-lock"></i>
+                            <span>Secure PayPal payment gateway</span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="order-summary">
+                <h3>Order Summary</h3>
+                <div class="plan-badge">{{ plan|title }} Plan</div>
+                
+                <div class="summary-item">
+                    <strong>Plan:</strong>
+                    <span>{{ plan|title }}</span>
+                </div>
+                <div class="summary-item">
+                    <strong>Amount:</strong>
+                    <span>${{ amount }}</span>
+                </div>
+                {% if plan == 'monthly' %}
+                    <div class="summary-item">
+                        <strong>Billing:</strong>
+                        <span>Monthly</span>
+                    </div>
+                {% elif plan == 'yearly' %}
+                    <div class="summary-item">
+                        <strong>Billing:</strong>
+                        <span>Yearly</span>
+                    </div>
+                {% else %}
+                    <div class="summary-item">
+                        <strong>Billing:</strong>
+                        <span>One-time</span>
+                    </div>
+                {% endif %}
+                <div class="summary-item">
+                    <strong>Tax:</strong>
+                    <span>$0.00</span>
+                </div>
+                <div class="summary-total">
+                    <span>Total:</span>
+                    <span>${{ amount }}</span>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    // Payment method tabs
+    document.querySelectorAll('.method-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            const method = this.dataset.method;
+            
+            document.querySelectorAll('.method-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.method-content').forEach(c => c.classList.remove('active'));
+            
+            this.classList.add('active');
+            document.getElementById(method + '-method').classList.add('active');
+        });
+    });
+
+    // Card formatting
+    const cardInput = document.getElementById('card_number');
+    const expiryInput = document.getElementById('expiry');
+    const cvvInput = document.getElementById('cvv');
+    
+    if (cardInput) {
+        cardInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s/g, '');
+            let formattedValue = value.replace(/(\d{4})/g, '$1 ').trim();
+            e.target.value = formattedValue;
+        });
+    }
+
+    if (expiryInput) {
+        expiryInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.slice(0, 2) + '/' + value.slice(2, 4);
+            }
+            e.target.value = value;
+        });
+    }
+
+    if (cvvInput) {
+        cvvInput.addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/\D/g, '');
+        });
+    }
+</script>
+
+{% endblock %}

@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+
+{% block title %}Subscription Plans - TextAnalyzer Pro{% endblock %}
+
+{% block content %}
+<style>
+    .subscription-header { text-align: center; margin-bottom: 50px; }
+    .subscription-header h1 { font-size: 36px; font-weight: 700; color: #1a1a1a; margin-bottom: 10px; }
+    .subscription-header p { font-size: 16px; color: #666; }
+    .plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin-bottom: 50px; }
+    .plan-card { background: white; border: 2px solid #e5e5e5; border-radius: 12px; padding: 30px; text-align: center; transition: all 0.3s; position: relative; }
+    .plan-card:hover { border-color: #10b981; box-shadow: 0 10px 30px rgba(16,185,129,0.15); transform: translateY(-5px); }
+    .plan-card.featured { border-color: #10b981; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; transform: scale(1.05); }
+    .plan-card.featured .plan-name, .plan-card.featured .plan-price, .plan-card.featured .plan-duration { color: white; }
+    .plan-badge { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: #10b981; color: white; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .plan-name { font-size: 24px; font-weight: 700; color: #1a1a1a; margin-bottom: 10px; }
+    .plan-price { font-size: 48px; font-weight: 900; color: #10b981; margin: 15px 0; }
+    .plan-price-period { font-size: 14px; color: #666; }
+    .plan-card.featured .plan-price-period { color: rgba(255,255,255,0.9); }
+    .plan-duration { font-size: 14px; color: #666; margin-bottom: 20px; }
+    .plan-features { list-style: none; margin: 25px 0; text-align: left; }
+    .plan-features li { padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; color: #666; }
+    .plan-card.featured .plan-features li { border-bottom-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.95); }
+    .plan-features li:before { content: '✓ '; color: #10b981; font-weight: 700; margin-right: 8px; }
+    .plan-card.featured .plan-features li:before { color: white; }
+    .plan-features li:last-child { border-bottom: none; }
+    .btn-select { width: 100%; padding: 12px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; margin-top: 20px; }
+    .btn-select:hover { background: #059669; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16,185,129,0.3); }
+    .plan-card.featured .btn-select { background: white; color: #10b981; }
+    .plan-card.featured .btn-select:hover { background: #f0f0f0; }
+    .current-plan { background: #e6f4ea; border: 2px solid #10b981; }
+    .current-plan .btn-select { background: #10b981; color: white; cursor: default; }
+    .current-plan .btn-select:hover { transform: none; }
+    @media (max-width: 768px) {
+        .subscription-header h1 { font-size: 28px; }
+        .plans-grid { grid-template-columns: 1fr; }
+        .plan-card.featured { transform: scale(1); }
+    }
+</style>
+
+<div class="subscription-header">
+    <h1>💳 Choose Your Plan</h1>
+    <p>Select the perfect plan for your needs</p>
+</div>
+
+<div class="plans-grid">
+    {% for plan_key, plan_data in plans.items %}
+        {% if plan_key == "monthly" %}
+            <div class="plan-card featured {% if profile.subscription_type == plan_key %}current-plan{% endif %}">
+                <div class="plan-badge">POPULAR</div>
+        {% else %}
+            <div class="plan-card {% if profile.subscription_type == plan_key %}current-plan{% endif %}">
+        {% endif %}
+            
+            <h3 class="plan-name">{{ plan_data.name }}</h3>
+            <div class="plan-price">${{ plan_data.price }}</div>
+            <div class="plan-price-period">{{ plan_data.duration }}</div>
+            <div class="plan-duration">
+                {% if plan_data.price == 0 %}
+                    Free trial
+                {% elif plan_key == "monthly" %}
+                    Billed monthly
+                {% elif plan_key == "yearly" %}
+                    Billed yearly
+                {% else %}
+                    One-time payment
+                {% endif %}
+            </div>
+            
+            <ul class="plan-features">
+                {% for feature in plan_data.features %}
+                    <li>{{ feature }}</li>
+                {% endfor %}
+            </ul>
+            
+            {% if profile.subscription_type == plan_key %}
+                <button class="btn-select" disabled>✓ Current Plan</button>
+            {% else %}
+                <a href="{% url 'checkout' plan_key %}" class="btn-select" style="text-decoration: none; display: block;">
+                    {% if plan_data.price == 0 %}
+                        Start Free Trial
+                    {% else %}
+                        Upgrade Now
+                    {% endif %}
+                </a>
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
+
+<div class="row mt-5">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0" style="color: #1a1a1a; font-weight: 700;">📋 Plan Comparison</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr style="background: #f8f9fa;">
+                                <th>Feature</th>
+                                <th>Trial</th>
+                                <th>Monthly</th>
+                                <th>Yearly</th>
+                                <th>Unlimited</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Plagiarism Check</strong></td>
+                                <td>✓</td>
+                                <td>✓</td>
+                                <td>✓</td>
+                                <td>✓</td>
+                            </tr>
+                            <tr>
+                                <td><strong>AI Detection</strong></td>
+                                <td>✓</td>
+                                <td>✓</td>
+                                <td>✓</td>
+                                <td>✓</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Text Summarization</strong></td>
+                                <td>Limited</td>
+                                <td>✓</td>
+                                <td>✓</td>
+                                <td>✓</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Document Converters</strong></td>
+                                <td>Limited</td>
+                                <td>✓</td>
+                                <td>✓</td>
+                                <td>✓</td>
+                            </tr>
+                            <tr>
+                                <td><strong>API Access</strong></td>
+                                <td>✗</td>
+                                <td>✓</td>
+                                <td>✓</td>
+                                <td>✓</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Priority Support</strong></td>
+                                <td>✗</td>
+                                <td>✓</td>
+                                <td>✓</td>
+                                <td>✓</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Batch Processing</strong></td>
+                                <td>✗</td>
+                                <td>✓</td>
+                                <td>✓</td>
+                                <td>✓</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

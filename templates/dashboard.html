@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - TextAnalyzer Pro{% endblock %}
+
+{% block content %}
+<style>
+    .dashboard-container { padding: 20px 0; }
+    .dashboard-header { margin-bottom: 40px; }
+    .dashboard-header h1 { font-size: 36px; font-weight: 800; color: #1a1a1a; margin-bottom: 8px; }
+    .dashboard-header p { color: #666; font-size: 16px; }
+    
+    .upgrade-banner { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 40px; box-shadow: 0 8px 20px rgba(16,185,129,0.2); }
+    .upgrade-banner h3 { margin-bottom: 10px; font-size: 20px; font-weight: 700; }
+    .upgrade-banner p { margin-bottom: 15px; font-size: 14px; opacity: 0.95; }
+    .upgrade-btn { background: white; color: #10b981; padding: 10px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block; transition: all 0.3s; }
+    .upgrade-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    
+    .stat-card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s; border: 2px solid transparent; }
+    .stat-card:hover { transform: translateY(-5px); box-shadow: 0 12px 24px rgba(0,0,0,0.12); border-color: #10b981; }
+    .stat-card.green { border-left: 4px solid #10b981; }
+    .stat-card.blue { border-left: 4px solid #3b82f6; }
+    .stat-card.purple { border-left: 4px solid #8b5cf6; }
+    .stat-card.orange { border-left: 4px solid #f59e0b; }
+    .stat-icon { font-size: 32px; margin-bottom: 12px; }
+    .stat-icon.green { color: #10b981; }
+    .stat-icon.blue { color: #3b82f6; }
+    .stat-icon.purple { color: #8b5cf6; }
+    .stat-icon.orange { color: #f59e0b; }
+    .stat-value { font-size: 32px; font-weight: 800; color: #1a1a1a; margin-bottom: 8px; }
+    .stat-label { font-size: 13px; color: #999; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+    
+    .action-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 40px; }
+    .action-card { background: white; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-decoration: none; color: inherit; }
+    .action-card:hover { transform: translateY(-8px); box-shadow: 0 12px 24px rgba(0,0,0,0.12); }
+    .action-card i { font-size: 28px; margin-bottom: 12px; display: block; }
+    .action-card .label { font-size: 13px; font-weight: 600; color: #1a1a1a; }
+    
+    .section-title { font-size: 20px; font-weight: 700; color: #1a1a1a; margin-bottom: 20px; margin-top: 40px; display: flex; align-items: center; gap: 10px; }
+    .section-title i { color: #10b981; }
+    
+    .feature-card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .feature-item { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+    .feature-item:last-child { margin-bottom: 0; }
+    .feature-item i { color: #10b981; font-size: 18px; margin-top: 2px; flex-shrink: 0; }
+    .feature-item span { font-size: 14px; color: #666; line-height: 1.5; }
+    
+    .converter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; }
+    .converter-box { padding: 24px; border-radius: 12px; text-align: center; color: white; cursor: pointer; transition: all 0.3s; text-decoration: none; }
+    .converter-box:hover { transform: translateY(-8px); }
+    .converter-box i { font-size: 36px; margin-bottom: 12px; display: block; }
+    .converter-box h6 { margin-bottom: 6px; font-weight: 700; font-size: 14px; }
+    .converter-box p { font-size: 12px; margin: 0; opacity: 0.9; }
+    .converter-pdf { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+    .converter-word { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
+    .converter-excel { background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); }
+    .converter-image { background: linear-gradient(135deg, #ec4899 0%, #be185d 100%); }
+    
+    .tips-box { background: linear-gradient(135deg, #f0fdf4 0%, #e6f4ea 100%); border-left: 4px solid #10b981; padding: 20px; border-radius: 8px; margin-top: 20px; }
+    .tips-box h6 { color: #1a1a1a; margin-bottom: 12px; font-weight: 700; }
+    .tips-box ul { margin: 0; padding-left: 20px; font-size: 13px; color: #666; }
+    .tips-box li { margin-bottom: 8px; }
+    
+    @media (max-width: 768px) {
+        .dashboard-header h1 { font-size: 28px; }
+        .action-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
+        .converter-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+</style>
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Welcome back, {{ user.username }}! 👋</h1>
+        <p>Here's your TextAnalyzer Pro dashboard overview</p>
+    </div>
+
+    <!-- Upgrade Banner -->
+    <div class="upgrade-banner">
+        <h3>Upgrade Your Plan</h3>
+        <p>Get unlimited access to all features and priority support</p>
+        <a href="{% url 'subscription' %}" class="upgrade-btn">View Plans</a>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="stat-card green">
+                <div class="stat-icon green"><i class="fas fa-file-alt"></i></div>
+                <div class="stat-value">{{ total_documents }}</div>
+                <div class="stat-label">Total Documents</div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="stat-card blue">
+                <div class="stat-icon blue"><i class="fas fa-search"></i></div>
+                <div class="stat-value">{{ total_checks }}</div>
+                <div class="stat-label">Plagiarism Checks</div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="stat-card purple">
+                <div class="stat-icon purple"><i class="fas fa-link"></i></div>
+                <div class="stat-value">{{ total_urls }}</div>
+                <div class="stat-label">Short URLs</div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="stat-card orange">
+                <div class="stat-icon orange"><i class="fas fa-qrcode"></i></div>
+                <div class="stat-value">{{ total_qrcodes }}</div>
+                <div class="stat-label">QR Codes</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="section-title"><i class="fas fa-bolt"></i> Quick Actions</div>
+    <div class="action-grid">
+        <a href="{% url 'plagiarism_check' %}" class="action-card" style="color: #10b981;">
+            <i class="fas fa-search"></i>
+            <div class="label">Check Plagiarism</div>
+        </a>
+        <a href="{% url 'plagiarism_removal' %}" class="action-card" style="color: #10b981;">
+            <i class="fas fa-eraser"></i>
+            <div class="label">Remove Plagiarism</div>
+        </a>
+        <a href="{% url 'ai_detection' %}" class="action-card" style="color: #3b82f6;">
+            <i class="fas fa-robot"></i>
+            <div class="label">Detect AI</div>
+        </a>
+        <a href="{% url 'text_summarization' %}" class="action-card" style="color: #8b5cf6;">
+            <i class="fas fa-compress-alt"></i>
+            <div class="label">Summarize</div>
+        </a>
+        <a href="{% url 'sentiment_analysis' %}" class="action-card" style="color: #f59e0b;">
+            <i class="fas fa-smile"></i>
+            <div class="label">Sentiment</div>
+        </a>
+        <a href="{% url 'text_statistics' %}" class="action-card" style="color: #ec4899;">
+            <i class="fas fa-chart-bar"></i>
+            <div class="label">Statistics</div>
+        </a>
+        <a href="{% url 'url_shortener' %}" class="action-card" style="color: #06b6d4;">
+            <i class="fas fa-link"></i>
+            <div class="label">Shorten URL</div>
+        </a>
+        <a href="{% url 'qr_generator' %}" class="action-card" style="color: #14b8a6;">
+            <i class="fas fa-qrcode"></i>
+            <div class="label">QR Code</div>
+        </a>
+    </div>
+
+    <!-- Document Converters -->
+    <div class="section-title"><i class="fas fa-file-export"></i> Document Converters</div>
+    <div class="converter-grid">
+        <a href="{% url 'pdf_converter' %}" class="converter-box converter-pdf">
+            <i class="fas fa-file-pdf"></i>
+            <h6>PDF Converter</h6>
+            <p>Convert to/from PDF</p>
+        </a>
+        <a href="{% url 'word_converter' %}" class="converter-box converter-word">
+            <i class="fas fa-file-word"></i>
+            <h6>Word Converter</h6>
+            <p>Convert to/from DOCX</p>
+        </a>
+        <a href="{% url 'excel_converter' %}" class="converter-box converter-excel">
+            <i class="fas fa-file-excel"></i>
+            <h6>Excel Converter</h6>
+            <p>Convert to/from XLSX</p>
+        </a>
+        <a href="{% url 'image_converter' %}" class="converter-box converter-image">
+            <i class="fas fa-image"></i>
+            <h6>Image Converter</h6>
+            <p>Convert image formats</p>
+        </a>
+    </div>
+
+    <!-- Features & Getting Started -->
+    <div class="row" style="margin-top: 40px;">
+        <div class="col-lg-6 mb-4">
+            <div class="feature-card">
+                <div class="section-title" style="margin-top: 0;"><i class="fas fa-star"></i> Platform Features</div>
+                <div class="feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Multi-algorithm plagiarism detection</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>AI content detection & humanization</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Advanced text summarization</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Sentiment analysis with scoring</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>URL shortening with analytics</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>QR code generation (10+ types)</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Document management system</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>REST API endpoints</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="feature-card">
+                <div class="section-title" style="margin-top: 0;"><i class="fas fa-graduation-cap"></i> Getting Started</div>
+                <div class="feature-item">
+                    <i class="fas fa-circle" style="font-size: 8px;"></i>
+                    <span><strong>Step 1:</strong> Upload or paste your text</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-circle" style="font-size: 8px;"></i>
+                    <span><strong>Step 2:</strong> Select analysis type</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-circle" style="font-size: 8px;"></i>
+                    <span><strong>Step 3:</strong> Review detailed results</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-circle" style="font-size: 8px;"></i>
+                    <span><strong>Step 4:</strong> Export or share findings</span>
+                </div>
+                <div class="tips-box">
+                    <h6><i class="fas fa-lightbulb"></i> Pro Tips</h6>
+                    <ul>
+                        <li>Use batch processing for multiple documents</li>
+                        <li>Adjust sensitivity thresholds for better results</li>
+                        <li>Save frequently used documents for quick access</li>
+                        <li>Check API documentation for integration</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

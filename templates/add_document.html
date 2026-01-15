@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Document - Text Analyzer{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Add Reference Document</h1>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0">Add New Document</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Document Title</label>
+                        <input type="text" class="form-control" id="title" name="title" placeholder="Enter document title..." required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Document Content</label>
+                        <textarea class="form-control" id="content" name="content" rows="10" placeholder="Enter or paste the document content..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Add Document
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0">Recent Documents</h5>
+            </div>
+            <div class="card-body">
+                {% if documents %}
+                    <div class="list-group list-group-flush">
+                        {% for doc in documents %}
+                        <div class="list-group-item">
+                            <h6 class="mb-1">{{ doc.title }}</h6>
+                            <p class="mb-1 text-muted small">{{ doc.content|truncatewords:10 }}</p>
+                            <small class="text-muted">{{ doc.created_at|date:"M d, Y" }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-3">
+                        <a href="{% url 'document_list' %}" class="btn btn-sm btn-outline-primary">View All Documents</a>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No documents added yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card shadow mt-3">
+            <div class="card-header">
+                <h6 class="mb-0">Tips</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled small">
+                    <li>• Add academic papers for plagiarism detection</li>
+                    <li>• Include research articles and publications</li>
+                    <li>• Use descriptive titles for easy identification</li>
+                    <li>• Documents are used as reference for comparison</li>
+                    <li>• Longer documents provide better detection</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

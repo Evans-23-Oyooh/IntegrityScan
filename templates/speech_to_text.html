@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Speech to Text{% endblock %}
+{% block content %}
+
+<div style="max-width: 900px; margin: 0 auto; padding: 30px 20px;">
+    <h1 style="color: #1a1a1a; margin-bottom: 10px;"><i class="fas fa-microphone" style="color: #10b981; margin-right: 10px;"></i>Speech to Text</h1>
+    <p style="color: #666; margin-bottom: 30px;">Convert audio files to text</p>
+
+    <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 10px; font-weight: 600;">Upload Audio File</label>
+                <div onclick="document.getElementById('audioInput').click();" style="border: 2px dashed #10b981; border-radius: 8px; padding: 40px; text-align: center; background: #f0fdf4; cursor: pointer;">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 40px; color: #10b981; margin-bottom: 15px; display: block;"></i>
+                    <h5 style="color: #1a1a1a; margin-bottom: 8px;">Click to upload or drag and drop</h5>
+                    <p style="color: #666; font-size: 13px; margin: 0;">MP3, WAV, OGG (Max 25MB)</p>
+                </div>
+                <input type="file" id="audioInput" name="audio" accept=".mp3,.wav,.ogg,.m4a" style="display: none;">
+                <div id="fileName" style="margin-top: 15px; padding: 12px; background: #e6f4ea; border-radius: 6px; display: none; color: #137333;">
+                    <i class="fas fa-check-circle"></i> <span id="fileNameText"></span>
+                </div>
+            </div>
+
+            <button type="submit" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 16px;">
+                <i class="fas fa-waveform-lines" style="margin-right: 8px;"></i>Convert to Text
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById('audioInput').addEventListener('change', function() {
+        if (this.files.length > 0) {
+            const file = this.files[0];
+            if (file.size > 25 * 1024 * 1024) {
+                alert('File size exceeds 25MB limit');
+                this.value = '';
+                document.getElementById('fileName').style.display = 'none';
+                return;
+            }
+            document.getElementById('fileNameText').textContent = file.name + ' (' + (file.size / 1024 / 1024).toFixed(2) + ' MB)';
+            document.getElementById('fileName').style.display = 'block';
+        }
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Text Analyzer{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8f9fa; }
+        
+        .navbar-top {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .navbar-brand { color: white; font-weight: 700; font-size: 18px; text-decoration: none; }
+        
+        .menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            display: none;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .menu-btn:hover { opacity: 0.8; }
+        
+        .container-main {
+            display: flex;
+            min-height: calc(100vh - 60px);
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: white;
+            border-right: 1px solid #e5e5e5;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.05);
+        }
+        
+        .sidebar-header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .sidebar-header h5 { margin: 0; font-weight: 600; font-size: 16px; }
+        .sidebar-header small { opacity: 0.9; display: block; margin-top: 5px; }
+        
+        .nav-section { margin: 20px 0; }
+        .nav-section-title { font-size: 12px; font-weight: 600; color: #999; text-transform: uppercase; padding: 0 20px; margin-bottom: 10px; letter-spacing: 0.5px; }
+        
+        .nav-link {
+            color: #333;
+            padding: 12px 20px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        
+        .nav-link:hover { background: #f0f0f0; color: #10b981; }
+        .nav-link.active { background: rgba(16,185,129,0.1); color: #10b981; border-left: 3px solid #10b981; padding-left: 17px; }
+        .nav-link i { width: 18px; text-align: center; }
+        
+        .logout-section { margin-top: auto; padding-top: 20px; border-top: 1px solid #e5e5e5; }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f8f9fa;
+        }
+        
+        .content-area {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        
+        .footer {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 13px;
+            border-top: 1px solid #059669;
+        }
+        
+        .footer a { color: #fff; text-decoration: none; font-weight: 500; }
+        .footer a:hover { text-decoration: underline; }
+        
+        .card {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: none;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+        
+        .card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border: none;
+            border-radius: 25px;
+            font-weight: 500;
+        }
+        
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16,185,129,0.3); }
+        
+        @media (max-width: 768px) {
+            .menu-btn { display: flex; }
+            
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                top: 60px;
+                height: calc(100vh - 60px);
+                z-index: 999;
+                width: 280px;
+                border-radius: 0;
+            }
+            
+            .sidebar.active { left: 0; }
+            
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 60px;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 998;
+            }
+            
+            .sidebar-overlay.active { display: block; }
+            
+            .container-main { flex-direction: column; }
+            
+            .content-area { padding: 20px; }
+        }
+        
+        @media (max-width: 480px) {
+            .navbar-brand { font-size: 16px; }
+            .content-area { padding: 15px; }
+            .sidebar { width: 100%; left: -100%; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <div class="navbar-top">
+        <a href="/" class="navbar-brand"><i class="fas fa-shield-alt" style="margin-right: 8px;"></i>IntegrityScan</a>
+        <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
+    </div>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Main Container -->
+    <div class="container-main">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h5>Welcome!</h5>
+                <small>{{ user.username }}</small>
+                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.2); font-size: 11px;">
+                    <div style="background: rgba(255,255,255,0.1); padding: 6px 8px; border-radius: 4px; text-align: center;">
+                        {% if user.userprofile.subscription_type == 'trial' %}
+                            <span>Trial Plan</span>
+                        {% elif user.userprofile.subscription_type == 'monthly' %}
+                            <span>Monthly Plan</span>
+                        {% elif user.userprofile.subscription_type == 'yearly' %}
+                            <span>Yearly Plan</span>
+                        {% elif user.userprofile.subscription_type == 'unlimited' %}
+                            <span>Unlimited Plan</span>
+                        {% else %}
+                            <span>Free User</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <a href="{% url 'dashboard' %}" class="nav-link"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Text Analysis</div>
+                <a href="{% url 'plagiarism_check' %}" class="nav-link"><i class="fas fa-search"></i>Plagiarism Check</a>
+                <a href="{% url 'plagiarism_removal' %}" class="nav-link"><i class="fas fa-eraser"></i>Remove Plagiarism</a>
+                <a href="{% url 'ai_detection' %}" class="nav-link"><i class="fas fa-robot"></i>AI Detection</a>
+                <a href="{% url 'text_summarization' %}" class="nav-link"><i class="fas fa-compress-alt"></i>Text Summary</a>
+                <a href="{% url 'sentiment_analysis' %}" class="nav-link"><i class="fas fa-smile"></i>Sentiment Analysis</a>
+                <a href="{% url 'text_statistics' %}" class="nav-link"><i class="fas fa-chart-pie"></i>Text Statistics</a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Tools</div>
+                <a href="{% url 'url_shortener' %}" class="nav-link"><i class="fas fa-link"></i>URL Shortener</a>
+                <a href="{% url 'qr_generator' %}" class="nav-link"><i class="fas fa-qrcode"></i>QR Generator</a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Audio Tools</div>
+                <a href="{% url 'text_to_speech' %}" class="nav-link"><i class="fas fa-volume-up"></i>Text to Speech</a>
+                <a href="{% url 'speech_to_text' %}" class="nav-link"><i class="fas fa-microphone"></i>Speech to Text</a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Documents</div>
+                <a href="{% url 'add_document' %}" class="nav-link"><i class="fas fa-plus"></i>Add Document</a>
+                <a href="{% url 'document_list' %}" class="nav-link"><i class="fas fa-file-alt"></i>Documents</a>
+                <a href="{% url 'analytics' %}" class="nav-link"><i class="fas fa-chart-bar"></i>Analytics</a>
+            </div>
+
+            <div class="nav-section logout-section">
+                <a href="{% url 'subscription' %}" class="nav-link"><i class="fas fa-credit-card"></i>Upgrade Plan</a>
+                <a href="{% url 'logout' %}" class="nav-link"><i class="fas fa-sign-out-alt"></i>Logout</a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="content-area">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% block content %}{% endblock %}
+            </div>
+
+            <footer class="footer">
+                <p>&copy; {% now "Y" %} IntegrityScan. Powered by <a href="#">VLA-Softwares</a></p>
+            </footer>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const menuBtn = document.getElementById('menuBtn');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+
+        menuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        });
+
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                }
+            });
+        });
+
+        // Set active link
+        document.querySelectorAll('.nav-link').forEach(link => {
+            if (link.href === window.location.href) {
+                link.classList.add('active');
+            }
+        });
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% block title %}Text Statistics - TextAnalyzer Pro{% endblock %}
+{% block content %}
+
+<style>
+    .ts-header { margin-bottom: 40px; }
+    .ts-header h1 { font-size: 36px; font-weight: 800; color: #1a1a1a; margin-bottom: 8px; }
+    .ts-header p { color: #666; font-size: 16px; }
+    
+    .ts-info-box { background: linear-gradient(135deg, #e6f4ea 0%, #f0fdf4 100%); border-left: 4px solid #10b981; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+    .ts-info-box p { margin: 0; color: #137333; font-size: 14px; }
+    
+    .ts-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px; }
+    
+    .ts-input-section { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .ts-input-section h3 { font-size: 18px; font-weight: 600; margin-bottom: 25px; color: #1a1a1a; }
+    
+    .ts-tabs { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #e5e5e5; }
+    .ts-tab { padding: 12px 20px; background: none; border: none; cursor: pointer; font-weight: 600; color: #999; font-size: 14px; transition: all 0.3s; border-bottom: 3px solid transparent; margin-bottom: -2px; }
+    .ts-tab.active { color: #10b981; border-bottom-color: #10b981; }
+    .ts-tab:hover { color: #10b981; }
+    
+    .ts-form-group { margin-bottom: 20px; }
+    .ts-form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #1a1a1a; font-size: 14px; }
+    .ts-form-group textarea { width: 100%; padding: 12px; border: 1px solid #e5e5e5; border-radius: 6px; font-size: 14px; font-family: inherit; resize: vertical; }
+    .ts-form-group textarea:focus { outline: none; border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
+    
+    .ts-upload-area { border: 2px dashed #e5e5e5; border-radius: 8px; padding: 30px; text-align: center; cursor: pointer; transition: all 0.3s; }
+    .ts-upload-area:hover { border-color: #10b981; background: #f9fdf7; }
+    .ts-upload-area.dragover { border-color: #10b981; background: #e6f4ea; }
+    .ts-upload-area i { font-size: 32px; color: #10b981; margin-bottom: 10px; }
+    .ts-upload-area p { margin: 0; color: #666; font-size: 14px; }
+    .ts-upload-area input { display: none; }
+    
+    .ts-btn-analyze { width: 100%; padding: 14px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.3s; margin-top: 10px; }
+    .ts-btn-analyze:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16,185,129,0.3); }
+    
+    .ts-features-section { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .ts-features-section h3 { font-size: 18px; font-weight: 600; margin-bottom: 20px; color: #1a1a1a; }
+    
+    .ts-feature-item { display: flex; gap: 12px; margin-bottom: 16px; }
+    .ts-feature-item i { font-size: 18px; min-width: 24px; color: #10b981; }
+    .ts-feature-item span { font-size: 14px; color: #666; line-height: 1.5; }
+    .ts-feature-item strong { color: #1a1a1a; }
+    
+    @media (max-width: 768px) {
+        .ts-container { grid-template-columns: 1fr; }
+        .ts-tabs { flex-wrap: wrap; }
+    }
+</style>
+
+<div class="ts-header">
+    <h1>Text Statistics</h1>
+    <p>Analyze comprehensive statistics about your text including word count, readability, and more</p>
+</div>
+
+<div class="ts-info-box">
+    <p>Get detailed insights into your text with advanced statistical analysis. Perfect for content creators, writers, and researchers.</p>
+</div>
+
+<div class="ts-container">
+    <!-- Input Section -->
+    <div class="ts-input-section">
+        <h3>Analyze Text</h3>
+        
+        <div class="ts-tabs">
+            <button class="ts-tab active" data-tab="text-tab">Text Input</button>
+            <button class="ts-tab" data-tab="file-tab">Upload File</button>
+        </div>
+
+        <form method="post" id="statsForm" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" id="document" name="document" accept=".pdf,.doc,.docx,.txt" style="display:none;">
+            <input type="hidden" id="text" name="text">
+
+            <!-- Text Tab -->
+            <div id="text-tab" class="ts-tab-content">
+                <div class="ts-form-group">
+                    <label for="textDisplay">Enter Text</label>
+                    <textarea id="textDisplay" placeholder="Paste your text here..." rows="8" style="width: 100%; padding: 12px; border: 1px solid #e5e5e5; border-radius: 6px; font-size: 14px; font-family: inherit; resize: vertical;"></textarea>
+                </div>
+            </div>
+
+            <!-- File Tab -->
+            <div id="file-tab" class="ts-tab-content" style="display: none;">
+                <div class="ts-upload-area" id="uploadArea">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Drag and drop your file here or click to browse</p>
+                    <p style="font-size: 12px; color: #999; margin-top: 8px;">Supported: PDF, DOC, DOCX, TXT</p>
+                </div>
+            </div>
+
+            <button type="submit" class="ts-btn-analyze" style="margin-top: 30px;">Analyze Statistics</button>
+        </form>
+    </div>
+
+    <!-- Features Section -->
+    <div class="ts-features-section">
+        <h3>Statistics Metrics</h3>
+        <div class="ts-feature-item">
+            <i class="fas fa-font"></i>
+            <span><strong>Word Count:</strong> Total number of words in your text</span>
+        </div>
+        <div class="ts-feature-item">
+            <i class="fas fa-keyboard"></i>
+            <span><strong>Character Count:</strong> Total characters including spaces</span>
+        </div>
+        <div class="ts-feature-item">
+            <i class="fas fa-align-left"></i>
+            <span><strong>Sentence Count:</strong> Number of sentences detected</span>
+        </div>
+        <div class="ts-feature-item">
+            <i class="fas fa-paragraph"></i>
+            <span><strong>Paragraph Count:</strong> Number of paragraphs identified</span>
+        </div>
+        <div class="ts-feature-item">
+            <i class="fas fa-chart-line"></i>
+            <span><strong>Readability Score:</strong> Flesch-Kincaid grade level</span>
+        </div>
+        <div class="ts-feature-item">
+            <i class="fas fa-file-upload"></i>
+            <span><strong>File Support:</strong> Analyze documents directly</span>
+        </div>
+        <div class="ts-feature-item">
+            <i class="fas fa-bolt"></i>
+            <span><strong>Instant Results:</strong> Get analysis in seconds</span>
+        </div>
+        <div class="ts-feature-item">
+            <i class="fas fa-download"></i>
+            <span><strong>Export Data:</strong> Download results as needed</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    const tabs = document.querySelectorAll('.ts-tab');
+    const tabContents = document.querySelectorAll('.ts-tab-content');
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('document');
+    const textDisplay = document.getElementById('textDisplay');
+    const textInput = document.getElementById('text');
+    const form = document.getElementById('statsForm');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tabContents.forEach(c => c.style.display = 'none');
+            tab.classList.add('active');
+            document.getElementById(tab.dataset.tab).style.display = 'block';
+        });
+    });
+
+    uploadArea.addEventListener('click', () => fileInput.click());
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        fileInput.files = e.dataTransfer.files;
+    });
+
+    fileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            const file = this.files[0];
+            if (file.size > 50 * 1024 * 1024) {
+                alert('File size exceeds 50MB limit');
+                this.value = '';
+                return;
+            }
+        }
+    });
+
+    form.addEventListener('submit', (e) => {
+        textInput.value = textDisplay.value;
+    });
+</script>
+
+{% endblock %}

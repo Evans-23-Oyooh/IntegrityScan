@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics - Text Analyzer{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Analytics & Reports</h1>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card shadow mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Recent Plagiarism Checks</h5>
+            </div>
+            <div class="card-body">
+                {% if plagiarism_checks %}
+                    {% for check in plagiarism_checks %}
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-2 {% if check.is_plagiarized %}bg-danger bg-opacity-10{% else %}bg-success bg-opacity-10{% endif %} rounded">
+                        <div>
+                            <div class="fw-bold">
+                                {% if check.is_plagiarized %}
+                                    <i class="fas fa-exclamation-triangle text-danger me-1"></i>Plagiarism Detected
+                                {% else %}
+                                    <i class="fas fa-check-circle text-success me-1"></i>Clean
+                                {% endif %}
+                            </div>
+                            <small class="text-muted">{{ check.text|truncatewords:8 }}</small>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold">{{ check.similarity_score|floatformat:1 }}%</div>
+                            <small class="text-muted">{{ check.created_at|date:"M d, H:i" }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No plagiarism checks performed yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card shadow mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Recent AI Detections</h5>
+            </div>
+            <div class="card-body">
+                {% if ai_detections %}
+                    {% for detection in ai_detections %}
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-2 {% if detection.is_ai_generated %}bg-warning bg-opacity-10{% else %}bg-success bg-opacity-10{% endif %} rounded">
+                        <div>
+                            <div class="fw-bold">
+                                {% if detection.is_ai_generated %}
+                                    <i class="fas fa-robot text-warning me-1"></i>AI Content
+                                {% else %}
+                                    <i class="fas fa-user text-success me-1"></i>Human Content
+                                {% endif %}
+                            </div>
+                            <small class="text-muted">{{ detection.text|truncatewords:8 }}</small>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold">{{ detection.ai_probability|floatformat:1 }}%</div>
+                            <small class="text-muted">{{ detection.created_at|date:"M d, H:i" }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No AI detections performed yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card shadow mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Top URLs by Clicks</h5>
+            </div>
+            <div class="card-body">
+                {% if url_stats %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Short Code</th>
+                                    <th>Clicks</th>
+                                    <th>Created</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for url in url_stats %}
+                                <tr>
+                                    <td>
+                                        <a href="/{{ url.short_code }}/" target="_blank">{{ url.short_code }}</a>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ url.clicks }}</span>
+                                    </td>
+                                    <td>{{ url.created_at|date:"M d" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No URLs created yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card shadow mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Recent QR Codes</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_qrcodes %}
+                    {% for qr in recent_qrcodes %}
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-2 bg-light rounded">
+                        <div>
+                            <div class="fw-bold">
+                                <i class="fas fa-qrcode me-1"></i>{{ qr.qr_type|title }}
+                            </div>
+                            <small class="text-muted">{{ qr.content|truncatewords:6 }}</small>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted">{{ qr.created_at|date:"M d, H:i" }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No QR codes generated yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment Analysis Results</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { 
+            max-width: 900px; 
+            margin: 0 auto; 
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .sentiment-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+            border-left: 5px solid #667eea;
+        }
+        .sentiment-positive { border-left-color: #28a745; }
+        .sentiment-negative { border-left-color: #dc3545; }
+        .sentiment-neutral { border-left-color: #6c757d; }
+        .sentiment-label {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .sentiment-positive .sentiment-label { color: #28a745; }
+        .sentiment-negative .sentiment-label { color: #dc3545; }
+        .sentiment-neutral .sentiment-label { color: #6c757d; }
+        .confidence-score {
+            font-size: 1.5rem;
+            color: #667eea;
+            font-weight: 600;
+        }
+        .text-section {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        .section-title {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .text-content {
+            line-height: 1.8;
+            color: #444;
+            font-size: 1rem;
+        }
+        .back-button {
+            display: inline-block;
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>😊 Sentiment Analysis Results</h1>
+        </div>
+
+        <div class="sentiment-card sentiment-{{ sentiment|lower }}">
+            <div class="sentiment-label">
+                {% if sentiment == 'positive' %}
+                    😊 Positive
+                {% elif sentiment == 'negative' %}
+                    😞 Negative
+                {% else %}
+                    😐 Neutral
+                {% endif %}
+            </div>
+            <div class="confidence-score">
+                Confidence: {{ confidence|floatformat:1 }}%
+            </div>
+        </div>
+
+        <div class="text-section">
+            <h3 class="section-title">📄 Analyzed Text</h3>
+            <div class="text-content">{{ text }}</div>
+        </div>
+
+        <a href="/sentiment-analysis/" class="back-button">← Analyze Another Text</a>
+    </div>
+</body>
+</html>

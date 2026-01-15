@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% block title %}URL Shortener - TextAnalyzer Pro{% endblock %}
+{% block content %}
+
+<style>
+    .tool-header { margin-bottom: 40px; }
+    .tool-header h1 { font-size: 32px; font-weight: 700; color: #1a1a1a; margin-bottom: 10px; }
+    .tool-header p { color: #666; font-size: 15px; }
+    
+    .info-box { background: linear-gradient(135deg, #e6f4ea 0%, #f0fdf4 100%); border-left: 4px solid #10b981; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+    .info-box p { margin: 0; color: #137333; font-size: 14px; }
+    
+    .tool-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px; }
+    
+    .input-section { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .input-section h3 { font-size: 18px; font-weight: 600; margin-bottom: 20px; color: #1a1a1a; }
+    
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #1a1a1a; font-size: 14px; }
+    .form-group input { width: 100%; padding: 12px; border: 1px solid #e5e5e5; border-radius: 6px; font-size: 14px; font-family: inherit; }
+    .form-group input:focus { outline: none; border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
+    
+    .btn-shorten { width: 100%; padding: 12px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.3s; margin-top: 10px; }
+    .btn-shorten:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16,185,129,0.3); }
+    
+    .features-section { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .features-section h3 { font-size: 18px; font-weight: 600; margin-bottom: 20px; color: #1a1a1a; }
+    
+    .feature-item { display: flex; gap: 12px; margin-bottom: 15px; }
+    .feature-item i { color: #10b981; font-size: 18px; min-width: 24px; }
+    .feature-item span { font-size: 14px; color: #666; }
+    
+    .recent-urls { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-top: 30px; }
+    .recent-urls h3 { font-size: 18px; font-weight: 600; margin-bottom: 20px; color: #1a1a1a; }
+    
+    .url-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border: 1px solid #e5e5e5; border-radius: 8px; margin-bottom: 10px; gap: 15px; }
+    .url-item:last-child { margin-bottom: 0; }
+    .url-original { flex: 1; }
+    .url-original .label { font-size: 12px; color: #999; font-weight: 600; text-transform: uppercase; }
+    .url-original .value { font-size: 13px; color: #1a1a1a; word-break: break-all; margin-top: 4px; }
+    .url-short { text-align: center; min-width: 120px; }
+    .url-short .label { font-size: 12px; color: #999; font-weight: 600; text-transform: uppercase; }
+    .url-short .value { font-size: 14px; color: #10b981; font-weight: 600; margin-top: 4px; }
+    .url-clicks { text-align: center; min-width: 80px; }
+    .url-clicks .label { font-size: 12px; color: #999; font-weight: 600; text-transform: uppercase; }
+    .url-clicks .value { font-size: 16px; color: #1a1a1a; font-weight: 600; margin-top: 4px; }
+    .url-actions { display: flex; gap: 8px; }
+    .btn-delete { padding: 8px 12px; background: #ff4757; color: white; border: none; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s; font-weight: 600; }
+    .btn-delete:hover { background: #ff3838; transform: translateY(-1px); }
+    
+    @media (max-width: 768px) {
+        .tool-container { grid-template-columns: 1fr; }
+        .url-item { flex-direction: column; align-items: flex-start; }
+        .url-short, .url-clicks { text-align: left; }
+        .url-actions { width: 100%; }
+    }
+</style>
+
+<div class="tool-header">
+    <h1>🔗 URL Shortener</h1>
+    <p>Create short, shareable links from long URLs</p>
+</div>
+
+<div class="info-box">
+    <p>✨ Shorten long URLs into compact links that are easy to share and track. Monitor click statistics for each shortened URL.</p>
+</div>
+
+<div class="tool-container">
+    <!-- Input Section -->
+    <div class="input-section">
+        <h3>Shorten Your URL</h3>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="url">Enter URL</label>
+                <input type="url" id="url" name="url" placeholder="https://example.com/very/long/url" required>
+            </div>
+            <button type="submit" class="btn-shorten">Shorten URL</button>
+        </form>
+    </div>
+
+    <!-- Features Section -->
+    <div class="features-section">
+        <h3>Features</h3>
+        <div class="feature-item">
+            <i class="fas fa-link"></i>
+            <span><strong>Quick Shortening:</strong> Convert long URLs instantly</span>
+        </div>
+        <div class="feature-item">
+            <i class="fas fa-chart-line"></i>
+            <span><strong>Click Tracking:</strong> Monitor how many times your link is clicked</span>
+        </div>
+        <div class="feature-item">
+            <i class="fas fa-share-alt"></i>
+            <span><strong>Easy Sharing:</strong> Share compact links on social media</span>
+        </div>
+        <div class="feature-item">
+            <i class="fas fa-history"></i>
+            <span><strong>History:</strong> View all your shortened URLs</span>
+        </div>
+        <div class="feature-item">
+            <i class="fas fa-lock"></i>
+            <span><strong>Secure:</strong> All links are encrypted and secure</span>
+        </div>
+    </div>
+</div>
+
+<!-- Recent URLs -->
+{% if recent_urls %}
+    <div class="recent-urls">
+        <h3>Recent URLs</h3>
+        {% for url in recent_urls %}
+            <div class="url-item">
+                <div class="url-original">
+                    <div class="label">Original URL</div>
+                    <div class="value">{{ url.original_url }}</div>
+                </div>
+                <div class="url-short">
+                    <div class="label">Short Code</div>
+                    <div class="value">{{ url.short_code }}</div>
+                </div>
+                <div class="url-clicks">
+                    <div class="label">Clicks</div>
+                    <div class="value">{{ url.clicks }}</div>
+                </div>
+                <div class="url-actions">
+                    <form method="post" action="{% url 'delete_url' url.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-delete" onclick="return confirm('Delete this URL?')">Delete</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+{% endblock %}

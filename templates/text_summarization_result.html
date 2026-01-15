@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}Summarization Results - TextAnalyzer Pro{% endblock %}
+
+{% block content %}
+<style>
+    .result-header { margin-bottom: 30px; }
+    .result-header h1 { color: #1a1a1a; font-weight: 700; font-size: 32px; margin-bottom: 10px; }
+    .stats-card { background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+    .stat-item { background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center; }
+    .stat-number { font-size: 32px; font-weight: 900; color: #10b981; margin-bottom: 8px; }
+    .stat-label { font-size: 12px; color: #999; text-transform: uppercase; font-weight: 600; }
+    .text-box { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .text-box h5 { color: #1a1a1a; font-weight: 700; margin-bottom: 15px; }
+    .text-preview { background: #f8f9fa; padding: 15px; border-radius: 8px; max-height: 300px; overflow-y: auto; font-size: 13px; color: #666; line-height: 1.6; }
+    .text-box.original .text-preview { border-left: 4px solid #ef4444; }
+    .text-box.summary .text-preview { border-left: 4px solid #10b981; }
+    .btn-new { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block; transition: all 0.3s; }
+    .btn-new:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16,185,129,0.3); color: white; }
+    .btn-copy { background: white; color: #10b981; padding: 8px 16px; border-radius: 6px; border: 2px solid #10b981; font-weight: 600; cursor: pointer; transition: all 0.3s; margin-top: 12px; }
+    .btn-copy:hover { background: #10b981; color: white; }
+    .method-badge { display: inline-block; background: #10b981; color: white; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    @media (max-width: 768px) {
+        .stat-number { font-size: 24px; }
+        .stats-grid { grid-template-columns: 1fr; }
+    }
+</style>
+
+<div class="result-header">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1>📝 Summarization Results</h1>
+            <p style="color: #666; margin: 0;">Summary generated successfully</p>
+        </div>
+        <a href="{% url 'text_summarization' %}" class="btn-new">+ Summarize Another</a>
+    </div>
+</div>
+
+<!-- Statistics -->
+<div class="stats-card">
+    <div class="stats-grid">
+        <div class="stat-item">
+            <div class="stat-number">{{ original_length }}</div>
+            <div class="stat-label">Original Characters</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ summary_length }}</div>
+            <div class="stat-label">Summary Characters</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ compression_ratio|floatformat:1 }}%</div>
+            <div class="stat-label">Compression Ratio</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number"><span class="method-badge">{{ summarization.method_used|title }}</span></div>
+            <div class="stat-label">Method Used</div>
+        </div>
+    </div>
+</div>
+
+<!-- Original Text -->
+<div class="text-box original">
+    <h5>📄 Original Text</h5>
+    <div class="text-preview">
+        {{ summarization.original_text|truncatewords:300 }}
+    </div>
+    <small style="color: #999; display: block; margin-top: 12px;">{{ original_length }} characters</small>
+</div>
+
+<!-- Summary -->
+<div class="text-box summary">
+    <h5>✨ Summary</h5>
+    <div class="text-preview">
+        {{ summarization.summary|truncatewords:300 }}
+    </div>
+    <small style="color: #999; display: block; margin-top: 12px;">{{ summary_length }} characters</small>
+    <button class="btn-copy" onclick="copyToClipboard('summary-text')">
+        <i class="fas fa-copy me-1"></i>Copy Summary
+    </button>
+</div>
+
+<!-- Action Buttons -->
+<div style="display: flex; gap: 15px; flex-wrap: wrap;">
+    <a href="{% url 'text_summarization' %}" class="btn-new">+ Summarize Another Text</a>
+    <a href="{% url 'plagiarism_check' %}" style="background: #3b82f6; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block; transition: all 0.3s;">
+        🔍 Check for Plagiarism
+    </a>
+</div>
+
+<textarea id="summary-text" style="position: absolute; left: -9999px;">{{ summarization.summary }}</textarea>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function copyToClipboard(elementId) {
+    const textArea = document.getElementById(elementId);
+    textArea.select();
+    document.execCommand('copy');
+    
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
+    btn.style.background = '#10b981';
+    btn.style.color = 'white';
+    
+    setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.style.background = 'white';
+        btn.style.color = '#10b981';
+    }, 2000);
+}
+</script>
+{% endblock %}

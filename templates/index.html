@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TextAnalyzer Pro - Advanced Text Analysis Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; color: #1a1a1a; line-height: 1.6; }
+        h1, h2, h3, h4, h5, h6 { font-family: 'Playfair Display', serif; }
+        
+        /* Header */
+        .header { background: #fff; border-bottom: 1px solid #e5e5e5; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .header-content { max-width: 1400px; margin: 0 auto; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 24px; font-weight: 900; background: linear-gradient(135deg, #10b981 0%, #059669 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none; }
+        .menu-toggle { display: none; background: none; border: none; font-size: 24px; color: #10b981; cursor: pointer; }
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+        }
+        .nav { display: flex; gap: 40px; align-items: center; }
+        .nav a { color: #333; text-decoration: none; font-weight: 500; font-size: 15px; transition: color 0.2s; }
+        .nav a:hover { color: #10b981; }
+        .btn-primary { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; padding: 12px 28px; border-radius: 50px; font-weight: 600; text-decoration: none; transition: all 0.3s; box-shadow: 0 4px 15px rgba(16,185,129,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16,185,129,0.4); }
+        
+        /* Hero */
+        .hero { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; padding: 100px 40px; position: relative; overflow: hidden; }
+        .hero::before { content: ''; position: absolute; top: -50%; right: -10%; width: 600px; height: 600px; background: rgba(255,255,255,0.1); border-radius: 50%; }
+        .hero::after { content: ''; position: absolute; bottom: -30%; left: -5%; width: 400px; height: 400px; background: rgba(255,255,255,0.05); border-radius: 50%; }
+        .hero-content { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; position: relative; z-index: 1; }
+        .hero h1 { font-size: 56px; font-weight: 900; line-height: 1.2; margin-bottom: 24px; letter-spacing: -1.5px; font-family: 'Playfair Display', serif; }
+        .hero p { font-size: 18px; font-weight: 400; margin-bottom: 40px; opacity: 0.95; }
+        .hero-image { text-align: center; }
+        .hero-image { position: relative; }
+        .hero-image img { width: 100%; max-width: 500px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .hero-image svg { width: 100%; max-width: 500px; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.2)); }
+        .hero-buttons { display: flex; gap: 20px; flex-wrap: wrap; }
+        .btn-hero { padding: 14px 32px; border-radius: 50px; font-weight: 600; font-size: 15px; text-decoration: none; transition: all 0.3s; display: inline-block; border: none; cursor: pointer; }
+        .btn-hero-white { background: #fff; color: #667eea; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+        .btn-hero-white:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.2); }
+        .btn-hero-outline { background: transparent; color: #fff; border: 2px solid #fff; }
+        .btn-hero-outline:hover { background: rgba(255,255,255,0.1); transform: translateY(-3px); }
+        
+        /* Stats Bar */
+        .stats { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); padding: 80px 40px; }
+        .stats-content { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; text-align: center; }
+        .stat-number { font-size: 52px; font-weight: 900; background: linear-gradient(135deg, #10b981 0%, #059669 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+        .stat-label { font-size: 16px; color: #333; font-weight: 600; }
+        
+        /* Services */
+        .services { padding: 120px 40px; background: #fff; }
+        .services-content { max-width: 1400px; margin: 0 auto; }
+        .section-header { text-align: center; margin-bottom: 80px; }
+        .section-header h2 { font-size: 48px; font-weight: 900; margin-bottom: 16px; color: #1a1a1a; letter-spacing: -1px; font-family: 'Playfair Display', serif; }
+        .section-header p { font-size: 18px; color: #666; font-weight: 500; }
+        .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+        .service-card { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 0; overflow: hidden; transition: all 0.3s; display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .service-card:hover { border-color: #10b981; box-shadow: 0 20px 40px rgba(16,185,129,0.15); transform: translateY(-8px); }
+        .service-card-image { width: 100%; height: 180px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); display: flex; align-items: center; justify-content: center; font-size: 70px; position: relative; overflow: hidden; }
+        .service-card-image img { width: 100%; height: 100%; object-fit: cover; }
+        .service-card > h3, .service-card > p, .service-card > a { padding: 0 30px; }
+        .service-card > h3 { padding-top: 25px; font-size: 22px; font-weight: 700; }
+        .service-card > p { font-size: 15px; color: #666; margin-bottom: 20px; }
+        .service-card > a { padding-bottom: 30px; }
+        .service-link { color: #10b981; font-weight: 600; text-decoration: none; font-size: 14px; transition: all 0.2s; }
+        .service-link:hover { color: #059669; text-decoration: underline; }
+        
+        /* Features */
+        .features { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); padding: 120px 40px; }
+        .features-content { max-width: 1400px; margin: 0 auto; }
+        .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-top: 60px; }
+        .feature { text-align: center; background: #fff; padding: 40px 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: all 0.3s; }
+        .feature:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(16,185,129,0.1); }
+        .feature-icon { width: 70px; height: 70px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 32px; color: #fff; flex-shrink: 0; }
+        .feature-icon i { font-size: 32px; }
+        .feature h3 { font-size: 20px; font-weight: 700; margin-bottom: 12px; color: #1a1a1a; }
+        .feature p { color: #666; font-size: 15px; line-height: 1.6; }
+        
+        /* Pricing */
+        .pricing { padding: 120px 40px; background: #fff; }
+        .pricing-content { max-width: 1400px; margin: 0 auto; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px; margin-top: 60px; }
+        .pricing-card { background: #fff; border: 2px solid #e5e5e5; border-radius: 12px; padding: 40px; text-align: center; transition: all 0.3s; position: relative; }
+        .pricing-card:hover { border-color: #10b981; box-shadow: 0 20px 40px rgba(16,185,129,0.15); transform: translateY(-5px); }
+        .pricing-card.featured { border-color: #10b981; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; transform: scale(1.05); }
+        .pricing-card.featured .price, .pricing-card.featured h3, .pricing-card.featured p { color: #fff; }
+        .pricing-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px; }
+        .price { font-size: 52px; font-weight: 900; color: #10b981; margin: 20px 0; }
+        .price-period { font-size: 15px; color: #666; font-weight: 500; }
+        .pricing-features { list-style: none; margin: 30px 0; text-align: left; }
+        .pricing-features li { padding: 12px 0; border-bottom: 1px solid #f0f0f0; font-size: 15px; }
+        .pricing-features li:last-child { border-bottom: none; }
+        .btn-pricing { display: block; width: 100%; padding: 14px; background: #10b981; color: #fff; border: none; border-radius: 50px; font-weight: 600; font-size: 15px; cursor: pointer; text-decoration: none; text-align: center; transition: all 0.3s; }
+        .btn-pricing:hover { background: #059669; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16,185,129,0.3); }
+        .pricing-card.featured .btn-pricing { background: #fff; color: #667eea; }
+        .pricing-card.featured .btn-pricing:hover { background: #f0f0f0; }
+        
+        /* CTA */
+        .cta { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; padding: 120px 40px; text-align: center; position: relative; overflow: hidden; }
+        .cta::before { content: ''; position: absolute; top: -50%; right: -10%; width: 500px; height: 500px; background: rgba(255,255,255,0.1); border-radius: 50%; }
+        .cta > div { position: relative; z-index: 1; }
+        .cta h2 { font-size: 48px; font-weight: 900; margin-bottom: 24px; letter-spacing: -1px; font-family: 'Playfair Display', serif; }
+        .cta p { font-size: 18px; margin-bottom: 40px; opacity: 0.95; }
+        
+        /* Footer */
+        .footer { background: #0f1419; color: #fff; padding: 80px 40px 40px; }
+        .footer-content { max-width: 1400px; margin: 0 auto; }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 60px; margin-bottom: 60px; }
+        .footer-col h4 { font-size: 16px; font-weight: 700; margin-bottom: 20px; color: #fff; }
+        .footer-col p { color: #aaa; font-size: 14px; line-height: 1.8; }
+        .footer-col ul { list-style: none; }
+        .footer-col ul li { margin-bottom: 12px; }
+        .footer-col ul li a { color: #aaa; text-decoration: none; font-size: 14px; transition: color 0.2s; }
+        .footer-col ul li a:hover { color: #10b981; }
+        .footer-bottom { border-top: 1px solid #333; padding-top: 30px; display: flex; justify-content: space-between; align-items: center; }
+        .footer-bottom p { color: #666; font-size: 14px; }
+        .social-links { display: flex; gap: 20px; }
+        .social-links a { color: #aaa; font-size: 20px; transition: color 0.2s; }
+        .social-links a:hover { color: #10b981; }
+        
+        @media (max-width: 768px) {
+            .header-content { padding: 16px 20px; }
+            .nav { gap: 20px; display: none; }
+            .nav.active { display: flex; flex-direction: column; position: absolute; top: 60px; left: 0; right: 0; background: #fff; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+            .hero h1 { font-size: 32px; }
+            .hero-content { grid-template-columns: 1fr; gap: 30px; padding: 60px 20px; }
+            .hero-image img { max-width: 100%; }
+            .hero-buttons { flex-direction: column; }
+            .btn-hero { width: 100%; }
+            .services-grid, .features-grid { grid-template-columns: 1fr; }
+            .pricing-grid { grid-template-columns: 1fr; }
+            .pricing-card.featured { transform: scale(1); }
+            .footer-grid { grid-template-columns: 1fr; gap: 30px; }
+            .stats-content { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+            .stat-number { font-size: 36px; }
+            .section-header h2 { font-size: 32px; }
+            .cta h2 { font-size: 32px; }
+            .footer-bottom { flex-direction: column; gap: 20px; text-align: center; }
+        }
+        @media (max-width: 480px) {
+            .header-content { padding: 12px 16px; }
+            .logo { font-size: 20px; }
+            .hero h1 { font-size: 24px; }
+            .hero p { font-size: 14px; }
+            .hero-content { padding: 40px 16px; }
+            .services-grid { gap: 16px; }
+            .service-card-image { height: 140px; }
+            .features-grid { gap: 20px; }
+            .feature { padding: 24px 16px; }
+            .pricing-grid { gap: 16px; }
+            .pricing-card { padding: 24px; }
+            .price { font-size: 36px; }
+            .footer-grid { gap: 20px; }
+            .footer-col h4 { font-size: 14px; }
+            .footer-col p, .footer-col ul li a { font-size: 12px; }
+            .stats-content { grid-template-columns: 1fr; }
+            .section-header h2 { font-size: 24px; }
+            .section-header p { font-size: 14px; }
+            .cta h2 { font-size: 24px; }
+            .cta p { font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="/" class="logo">TextAnalyzer Pro</a>
+            <button class="menu-toggle" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+            <nav class="nav" id="navMenu">
+                <a href="#services">Services</a>
+                <a href="#features">Features</a>
+                <a href="#pricing">Pricing</a>
+                <a href="/login/">Sign In</a>
+                <a href="/register/" class="btn-primary">Get Started</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-content">
+            <div>
+                <h1>Advanced Text Analysis Platform for Professionals</h1>
+                <p>Detect plagiarism, analyze AI content, and process text with cutting-edge algorithms. Trusted by thousands of professionals worldwide.</p>
+                <div class="hero-buttons">
+                    <a href="/register/" class="btn-hero btn-hero-white">Start Free Trial</a>
+                    <a href="#services" class="btn-hero btn-hero-outline">Explore Services</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=500&h=500&fit=crop" alt="AI Analysis" style="border-radius: 20px;">
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="stats">
+        <div class="stats-content">
+            <div>
+                <div class="stat-number">10,000+</div>
+                <div class="stat-label">Active Users</div>
+            </div>
+            <div>
+                <div class="stat-number">1M+</div>
+                <div class="stat-label">Documents Analyzed</div>
+            </div>
+            <div>
+                <div class="stat-number">99%</div>
+                <div class="stat-label">Accuracy Rate</div>
+            </div>
+            <div>
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Support Available</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services -->
+    <section class="services" id="services">
+        <div class="services-content">
+            <div class="section-header">
+                <h2>Our Services</h2>
+                <p>Comprehensive suite of AI-powered text analysis tools</p>
+            </div>
+            <div class="services-grid">
+                <div class="service-card">
+                <div class="service-card-image"><img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=200&fit=crop" alt="Plagiarism Detection"></div>
+                    <h3>Plagiarism Detection</h3>
+                    <p>Advanced multi-algorithm detection with semantic analysis, n-gram comparison, and database matching for accurate results.</p>
+                    <a href="/plagiarism/" class="service-link">Learn more →</a>
+                </div>
+                <div class="service-card">
+                <div class="service-card-image"><img src="https://images.unsplash.com/photo-1677442d019cecf8d5a594b4e1d0b5c5?w=400&h=200&fit=crop" alt="AI Detection"></div>
+                    <h3>AI Content Detection</h3>
+                    <p>Identify AI-generated content using machine learning models trained on millions of text samples.</p>
+                    <a href="/ai-detection/" class="service-link">Learn more →</a>
+                </div>
+                <div class="service-card">
+                <div class="service-card-image"><img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=200&fit=crop" alt="Text Statistics"></div>
+                    <h3>Text Statistics</h3>
+                    <p>Comprehensive analysis including readability scores, word count, complexity metrics, and more.</p>
+                    <a href="/text-statistics/" class="service-link">Learn more →</a>
+                </div>
+                <div class="service-card">
+                <div class="service-card-image"><img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&h=200&fit=crop" alt="Text Summarization"></div>
+                    <h3>Text Summarization</h3>
+                    <p>Generate concise summaries using extractive and abstractive techniques powered by AI.</p>
+                    <a href="/text-summarization/" class="service-link">Learn more →</a>
+                </div>
+                <div class="service-card">
+                <div class="service-card-image"><img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=200&fit=crop" alt="Sentiment Analysis"></div>
+                    <h3>Sentiment Analysis</h3>
+                    <p>Analyze emotional tone and sentiment in text with detailed positive, negative, and neutral scoring.</p>
+                    <a href="/sentiment-analysis/" class="service-link">Learn more →</a>
+                </div>
+                <div class="service-card">
+                <div class="service-card-image"><img src="https://images.unsplash.com/photo-1460925895917-adf4e565db18?w=400&h=200&fit=crop" alt="URL Shortener"></div>
+                    <h3>URL Shortener & QR</h3>
+                    <p>Create short URLs and generate QR codes for easy sharing and tracking of your content.</p>
+                    <a href="/url-shortener/" class="service-link">Learn more →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features" id="features">
+        <div class="features-content">
+            <div class="section-header">
+                <h2>Why Choose TextAnalyzer Pro</h2>
+                <p>Built for professionals who demand accuracy and speed</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature">
+                    <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+                    <h3>Lightning Fast</h3>
+                    <p>Process thousands of words in seconds with our optimized analysis engine</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon"><i class="fas fa-bullseye"></i></div>
+                    <h3>99% Accuracy</h3>
+                    <p>Industry-leading accuracy using advanced machine learning algorithms</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                    <h3>Secure & Private</h3>
+                    <p>End-to-end encryption with GDPR compliance and complete data privacy</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon"><i class="fas fa-file-import"></i></div>
+                    <h3>Multi-Format Support</h3>
+                    <p>Analyze TXT, PDF, DOC, DOCX, and even images with OCR technology</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon"><i class="fas fa-chart-bar"></i></div>
+                    <h3>Detailed Reports</h3>
+                    <p>Comprehensive analysis reports with actionable insights and metrics</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon"><i class="fas fa-code"></i></div>
+                    <h3>API Access</h3>
+                    <p>Integrate our services into your workflow with our RESTful API</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="pricing" id="pricing">
+        <div class="pricing-content">
+            <div class="section-header">
+                <h2>Simple, Transparent Pricing</h2>
+                <p>Choose the plan that fits your needs</p>
+            </div>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3>Trial</h3>
+                    <div class="price">Free</div>
+                    <div class="price-period">14 days</div>
+                    <ul class="pricing-features">
+                        <li>✓ All 9 services</li>
+                        <li>✓ Basic usage limits</li>
+                        <li>✓ Email support</li>
+                        <li>✓ No credit card required</li>
+                    </ul>
+                    <a href="/register/" class="btn-pricing">Start Free Trial</a>
+                </div>
+                <div class="pricing-card featured">
+                    <h3>Monthly</h3>
+                    <div class="price">$2</div>
+                    <div class="price-period">per month</div>
+                    <ul class="pricing-features">
+                        <li>✓ All features included</li>
+                        <li>✓ Unlimited usage</li>
+                        <li>✓ Priority support</li>
+                        <li>✓ API access</li>
+                    </ul>
+                    <a href="/subscription/" class="btn-pricing">Get Started</a>
+                </div>
+                <div class="pricing-card">
+                    <h3>Yearly</h3>
+                    <div class="price">$20</div>
+                    <div class="price-period">per year (save 17%)</div>
+                    <ul class="pricing-features">
+                        <li>✓ All features included</li>
+                        <li>✓ Unlimited usage</li>
+                        <li>✓ Priority support</li>
+                        <li>✓ Best value</li>
+                    </ul>
+                    <a href="/subscription/" class="btn-pricing">Get Started</a>
+                </div>
+                <div class="pricing-card">
+                    <h3>Unlimited</h3>
+                    <div class="price">$50</div>
+                    <div class="price-period">lifetime access</div>
+                    <ul class="pricing-features">
+                        <li>✓ All features forever</li>
+                        <li>✓ Unlimited usage</li>
+                        <li>✓ VIP support</li>
+                        <li>✓ One-time payment</li>
+                    </ul>
+                    <a href="/subscription/" class="btn-pricing">Get Lifetime</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta">
+        <div>
+            <h2>Ready to Get Started?</h2>
+            <p>Join thousands of professionals using TextAnalyzer Pro today</p>
+            <a href="/register/" class="btn-hero btn-hero-white">Start Your Free Trial</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>TextAnalyzer Pro</h4>
+                    <p>Advanced AI-powered text analysis platform trusted by professionals worldwide. Detect plagiarism, analyze content, and process text with cutting-edge technology.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Services</h4>
+                    <ul>
+                        <li><a href="/plagiarism/">Plagiarism Check</a></li>
+                        <li><a href="/ai-detection/">AI Detection</a></li>
+                        <li><a href="/text-summarization/">Summarization</a></li>
+                        <li><a href="/sentiment-analysis/">Sentiment Analysis</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Tools</h4>
+                    <ul>
+                        <li><a href="/url-shortener/">URL Shortener</a></li>
+                        <li><a href="/qr-generator/">QR Generator</a></li>
+                        <li><a href="/text-statistics/">Text Statistics</a></li>
+                        <li><a href="/documents/">Documents</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Careers</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Cookie Policy</a></li>
+                        <li><a href="#">GDPR</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 TextAnalyzer Pro. All rights reserved.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fas fa-envelope"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script>
+        function toggleMenu() {
+            const navMenu = document.getElementById('navMenu');
+            navMenu.classList.toggle('active');
+        }
+        document.querySelectorAll('.nav a').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('navMenu').classList.remove('active');
+            });
+        });
+    </script>
+</body>
+</html>
