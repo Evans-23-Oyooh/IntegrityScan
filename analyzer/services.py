@@ -7,11 +7,19 @@ from collections import Counter
 import qrcode
 from io import BytesIO
 from django.core.files.base import ContentFile
-from transformers import pipeline
+try:
+    from transformers import pipeline
+    TRANSFORMERS_AVAILABLE = True
+except ImportError:
+    TRANSFORMERS_AVAILABLE = False
 import nltk
 from nltk.corpus import wordnet
 from nltk.tokenize import sent_tokenize, word_tokenize
-from textstat import flesch_reading_ease
+try:
+    from textstat import flesch_reading_ease
+    TEXTSTAT_AVAILABLE = True
+except ImportError:
+    TEXTSTAT_AVAILABLE = False
 import heapq
 import os
 
@@ -220,9 +228,12 @@ class PlagiarismDetector:
 
 class AIDetector:
     def __init__(self):
-        try:
-            self.classifier = pipeline("text-classification", model="roberta-base-openai-detector")
-        except:
+        if TRANSFORMERS_AVAILABLE:
+            try:
+                self.classifier = pipeline("text-classification", model="roberta-base-openai-detector")
+            except:
+                self.classifier = None
+        else:
             self.classifier = None
     
     def detect_ai_content(self, text):
@@ -533,9 +544,12 @@ class PlagiarismRemover:
 
 class TextSummarizationService:
     def __init__(self):
-        try:
-            self.summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
-        except:
+        if TRANSFORMERS_AVAILABLE:
+            try:
+                self.summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+            except:
+                self.summarizer = None
+        else:
             self.summarizer = None
     
     def extractive_summary(self, text, num_sentences=3):
@@ -592,9 +606,12 @@ class LanguageTranslationService:
 
 class SentimentAnalysisService:
     def __init__(self):
-        try:
-            self.analyzer = pipeline("sentiment-analysis")
-        except:
+        if TRANSFORMERS_AVAILABLE:
+            try:
+                self.analyzer = pipeline("sentiment-analysis")
+            except:
+                self.analyzer = None
+        else:
             self.analyzer = None
     
     def analyze_sentiment(self, text):
@@ -670,10 +687,13 @@ class TextStatisticsService:
         paragraph_count = len([p for p in paragraphs if p.strip()])
         
         # Readability score
-        try:
-            readability_score = flesch_reading_ease(text)
-        except:
-            # Fallback calculation
+        if TEXTSTAT_AVAILABLE:
+            try:
+                readability_score = flesch_reading_ease(text)
+            except:
+                avg_sentence_length = word_count / max(sentence_count, 1)
+                readability_score = 206.835 - (1.015 * avg_sentence_length)
+        else:
             avg_sentence_length = word_count / max(sentence_count, 1)
             readability_score = 206.835 - (1.015 * avg_sentence_length)
         
