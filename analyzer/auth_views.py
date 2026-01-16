@@ -1,9 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
@@ -17,36 +16,49 @@ def welcome(request):
 
 def register_view(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
-            user.is_active = False
-            user.save()
-            
-            # Generate verification code
-            verification_code = ''.join(random.choices(string.digits, k=6))
-            expires_at = timezone.now() + timedelta(hours=24)
-            
-            EmailVerification.objects.create(
-                user=user,
-                verification_code=verification_code,
-                expires_at=expires_at
-            )
-            
-            # Send email
-            send_mail(
-                'Verify Your Email - IntegrityScan',
-                f'Your verification code is: {verification_code}\n\nThis code expires in 24 hours.',
-                settings.DEFAULT_FROM_EMAIL,
-                [user.email or user.username + '@example.com'],
-                fail_silently=False,
-            )
-            
-            messages.success(request, 'Account created! Check your email for verification code.')
-            return redirect('verify_email', username=user.username)
-    else:
-        form = UserCreationForm()
-    return render(request, 'auth/register.html', {'form': form})
+        email = request.POST.get('email', '')
+        password1 = request.POST.get('password1', '')
+        password2 = request.POST.get('password2', '')
+        
+        if not email or '@' not in email:
+            messages.error(request, 'Please enter a valid email')
+            return render(request, 'auth/register.html')
+        
+        if User.objects.filter(email=email).exists():
+            messages.error(request, 'Email already registered')
+            return render(request, 'auth/register.html')
+        
+        if password1 != password2:
+            messages.error(request, 'Passwords do not match')
+            return render(request, 'auth/register.html')
+        
+        if len(password1) < 8:
+            messages.error(request, 'Password must be at least 8 characters')
+            return render(request, 'auth/register.html')
+        
+        username = email.split('@')[0]
+        counter = 1
+        while User.objects.filter(username=username).exists():
+            username = f"{email.split('@')[0]}{counter}"
+            counter += 1
+        
+        user = User.objects.create_user(username=username, email=email, password=password1)
+        user.is_active = False
+        user.save()
+        
+        verification_code = ''.join(random.choices(string.digits, k=6))
+        expires_at = timezone.now() + timedelta(hours=24)
+        
+        EmailVerification.objects.create(
+            user=user,
+            verification_code=verification_code,
+            expires_at=expires_at
+        )
+        
+        messages.success(request, 'Account created! Check your email for verification code.')
+        return redirect('verify_email', username=user.username)
+    
+    return render(request, 'auth/register.html')
 
 def verify_email(request, username):
     try:
@@ -82,9 +94,19 @@ def verify_email(request, username):
 
 def login_view(request):
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
+        username_or_email = request.POST.get('username', '')
+        password = request.POST.get('password', '')
+        
+        user = None
+        if '@' in username_or_email:
+            try:
+                user_obj = User.objects.get(email=username_or_email)
+                user = authenticate(request, username=user_obj.username, password=password)
+            except User.DoesNotExist:
+                pass
+        else:
+            user = authenticate(request, username=username_or_email, password=password)
+        
         if user is not None:
             login(request, user)
             return redirect('dashboard')
@@ -129,10 +151,8 @@ def forgot_password(request):
         email = request.POST.get('email', '')
         try:
             user = User.objects.get(email=email)
-            # Delete old reset codes
             PasswordReset.objects.filter(user=user, is_used=False).delete()
             
-            # Generate reset code
             reset_code = ''.join(random.choices(string.digits, k=6))
             expires_at = timezone.now() + timedelta(hours=24)
             
@@ -142,13 +162,12 @@ def forgot_password(request):
                 expires_at=expires_at
             )
             
-            # Send email
             send_mail(
                 'Password Reset Code - IntegrityScan',
                 f'Your password reset code is: {reset_code}\n\nThis code expires in 24 hours.\n\nIf you did not request this, please ignore this email.',
                 settings.DEFAULT_FROM_EMAIL,
                 [email],
-                fail_silently=False,
+                fail_silently=True,
             )
             
             messages.success(request, 'Reset code sent to your email. Check your inbox.')
@@ -175,12 +194,10 @@ def reset_password(request):
                 messages.error(request, 'Reset code expired. Please request a new one.')
                 return redirect('forgot_password')
             
-            # Update password
             user = reset.user
             user.set_password(new_password)
             user.save()
             
-            # Mark as used
             reset.is_used = True
             reset.save()
             
