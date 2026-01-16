@@ -35,6 +35,9 @@
 
             <div class="info">
                 We've sent a 6-digit verification code to your email. Enter it below to verify your account.
+                {% if verification_code %}
+                <br><br><strong>Your verification code: {{ verification_code }}</strong>
+                {% endif %}
             </div>
 
             {% if messages %}

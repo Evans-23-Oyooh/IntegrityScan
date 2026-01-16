@@ -78,7 +78,7 @@ def verify_email(request, username):
         else:
             messages.error(request, 'Invalid verification code')
     
-    return render(request, 'auth/verify_email.html', {'username': username})
+    return render(request, 'auth/verify_email.html', {'username': username, 'verification_code': verification.verification_code})
 
 def login_view(request):
     if request.method == 'POST':
