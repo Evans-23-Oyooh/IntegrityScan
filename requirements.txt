@@ -9,8 +9,6 @@ psycopg2-binary==2.9.6
 whitenoise==6.5.0
 dj-database-url==2.0.0
 nltk==3.8.1
-transformers==4.30.0
-torch==2.0.0
 gTTS==2.3.2
 qrcode==7.4.2
 python-docx==0.8.11
