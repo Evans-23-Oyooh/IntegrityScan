@@ -1,0 +1,72 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                  INTEGRITYSCAN - PYTHONANYWHERE QUICK FIX                  ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+ERRORS FIXED:
+✓ ModuleNotFoundError: No module named 'allauth'
+✓ ModuleNotFoundError: No module named 'transformers'
+✓ ModuleNotFoundError: No module named 'nltk'
+✓ Invalid HTTP_HOST header: 'evansoyoo97.pythonanywhere.com'
+✓ no such table: analyzer_urlshortener
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DEPLOYMENT STEPS (Copy & Paste):
+
+1. SSH into PythonAnywhere console
+
+2. Run these commands:
+
+   cd /home/evansoyoo97/IntegrityScan
+   source /home/evansoyoo97/.virtualenvs/integrityscan/bin/activate
+   pip install --upgrade -r requirements.txt --no-cache-dir
+   python -c "import nltk; nltk.download('punkt'); nltk.download('wordnet'); nltk.download('punkt_tab')"
+   python manage.py migrate
+   python manage.py collectstatic --noinput
+
+3. Go to PythonAnywhere Web tab → Click "Reload"
+
+4. Visit: https://evansoyoo97.pythonanywhere.com
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FILES CHANGED:
+• requirements.txt - Added transformers, torch, textstat
+• textanalyzer/settings.py - Fixed ALLOWED_HOSTS and CSRF_TRUSTED_ORIGINS
+
+NEW DOCUMENTATION:
+• PYTHONANYWHERE_DEPLOYMENT.md - Complete deployment guide
+• DEPLOYMENT_FIXES_SUMMARY.md - Detailed fix summary
+• deploy_pythonanywhere.sh - Automated deployment script
+• deploy_local.bat - Local testing script
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TROUBLESHOOTING:
+
+Memory Error?
+→ pip install transformers==4.30.0 --no-cache-dir
+
+Still getting errors?
+→ Check PythonAnywhere error log in Web tab
+
+Database errors?
+→ python manage.py migrate --run-syncdb
+
+Static files not loading?
+→ python manage.py collectstatic --noinput
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+VERIFICATION:
+✓ Homepage loads
+✓ Admin panel works (/admin/)
+✓ Can register user
+✓ Can submit plagiarism check
+✓ Results display correctly
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ESTIMATED TIME: 5-10 minutes
+STATUS: Ready for deployment
+LAST UPDATED: 2026-01-15

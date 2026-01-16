@@ -104,7 +104,7 @@ REST_FRAMEWORK = {
     ]
 }
 
-CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://127.0.0.1:8000,http://localhost:8000').split(',')
+CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://127.0.0.1:8000,http://localhost:8000,https://evansoyoo97.pythonanywhere.com').split(',')
 CSRF_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_HTTPONLY = True
 SECURE_SSL_REDIRECT = not DEBUG
