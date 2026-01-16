@@ -12,9 +12,19 @@ try:
     TRANSFORMERS_AVAILABLE = True
 except ImportError:
     TRANSFORMERS_AVAILABLE = False
-import nltk
-from nltk.corpus import wordnet
-from nltk.tokenize import sent_tokenize, word_tokenize
+
+try:
+    import nltk
+    from nltk.corpus import wordnet
+    from nltk.tokenize import sent_tokenize, word_tokenize
+    NLTK_AVAILABLE = True
+except ImportError:
+    NLTK_AVAILABLE = False
+    nltk = None
+    wordnet = None
+    sent_tokenize = None
+    word_tokenize = None
+
 try:
     from textstat import flesch_reading_ease
     TEXTSTAT_AVAILABLE = True
@@ -147,6 +157,8 @@ class PlagiarismDetector:
         self._download_nltk_data()
     
     def _download_nltk_data(self):
+        if not NLTK_AVAILABLE:
+            return
         try:
             nltk.data.find('corpora/wordnet')
         except LookupError:
@@ -316,6 +328,8 @@ class PlagiarismRemover:
         self.synonym_cache = {}
     
     def _download_nltk_data(self):
+        if not NLTK_AVAILABLE:
+            return
         try:
             nltk.data.find('corpora/wordnet')
             nltk.data.find('tokenizers/punkt_tab')
@@ -324,11 +338,12 @@ class PlagiarismRemover:
             nltk.download('punkt_tab', quiet=True)
     
     def advanced_paraphrase(self, text):
+        if not NLTK_AVAILABLE:
+            return text
         sentences = sent_tokenize(text)
         paraphrased = []
         
         for sentence in sentences:
-            # Advanced sentence restructuring techniques
             restructured = self._restructure_sentence(sentence)
             paraphrased.append(restructured)
         
@@ -435,6 +450,8 @@ class PlagiarismRemover:
         return ' '.join(new_words)
     
     def _get_best_synonym(self, word):
+        if not NLTK_AVAILABLE:
+            return None
         if word in self.synonym_cache:
             return random.choice(self.synonym_cache[word]) if self.synonym_cache[word] else None
         
@@ -448,9 +465,8 @@ class PlagiarismRemover:
                     synonym.isalpha()):
                     synonyms.add(synonym)
         
-        # Filter out poor synonyms
         good_synonyms = [s for s in synonyms if self._is_good_synonym(word, s)]
-        self.synonym_cache[word] = good_synonyms[:5]  # Cache top 5
+        self.synonym_cache[word] = good_synonyms[:5]
         
         return random.choice(good_synonyms) if good_synonyms else None
     
@@ -504,12 +520,13 @@ class PlagiarismRemover:
         }
     
     def _sentence_splitting(self, text):
+        if not NLTK_AVAILABLE:
+            return text
         sentences = sent_tokenize(text)
         new_sentences = []
         
         for sentence in sentences:
             if len(sentence) > 100 and ' and ' in sentence:
-                # Split long sentences with 'and'
                 parts = sentence.split(' and ', 1)
                 if len(parts) == 2:
                     new_sentences.append(parts[0] + '.')
@@ -553,11 +570,12 @@ class TextSummarizationService:
             self.summarizer = None
     
     def extractive_summary(self, text, num_sentences=3):
+        if not NLTK_AVAILABLE:
+            return text[:500]
         sentences = sent_tokenize(text)
         if len(sentences) <= num_sentences:
             return text
         
-        # Simple frequency-based extractive summarization
         words = word_tokenize(text.lower())
         word_freq = Counter(words)
         
@@ -659,34 +677,33 @@ class SentimentAnalysisService:
 
 class KeywordExtractionService:
     def extract_keywords(self, text, num_keywords=10):
-        # Simple TF-IDF based keyword extraction
+        if not NLTK_AVAILABLE:
+            return []
         words = word_tokenize(text.lower())
         stop_words = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should'}
         
-        # Filter words
         filtered_words = [word for word in words if word.isalpha() and len(word) > 2 and word not in stop_words]
-        
-        # Count frequency
         word_freq = Counter(filtered_words)
-        
-        # Get top keywords
         keywords = [{'word': word, 'frequency': freq} for word, freq in word_freq.most_common(num_keywords)]
         
         return keywords
 
 class TextStatisticsService:
     def analyze_text(self, text):
-        words = word_tokenize(text)
-        sentences = sent_tokenize(text)
+        if not NLTK_AVAILABLE:
+            words = text.split()
+            sentences = text.split('.')
+        else:
+            words = word_tokenize(text)
+            sentences = sent_tokenize(text)
+        
         paragraphs = text.split('\n\n')
         
-        # Basic statistics
-        word_count = len([word for word in words if word.isalpha()])
+        word_count = len([word for word in words if isinstance(word, str) and word.isalpha()])
         character_count = len(text)
         sentence_count = len(sentences)
         paragraph_count = len([p for p in paragraphs if p.strip()])
         
-        # Readability score
         if TEXTSTAT_AVAILABLE:
             try:
                 readability_score = flesch_reading_ease(text)
