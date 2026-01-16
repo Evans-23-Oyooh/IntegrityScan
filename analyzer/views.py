@@ -13,6 +13,7 @@ from .services import (PlagiarismDetector, AIDetector, URLShortenerService, QRCo
 from .document_parser import DocumentParser
 from .decorators import subscription_required
 from .ai_humanizer import AIHumanizer
+from .ultimate_detector import UltimatePlagiarismDetector
 
 @login_required
 def dashboard(request):
